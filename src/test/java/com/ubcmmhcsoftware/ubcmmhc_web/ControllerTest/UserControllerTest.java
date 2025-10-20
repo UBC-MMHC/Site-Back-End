@@ -3,7 +3,6 @@ package com.ubcmmhcsoftware.ubcmmhc_web.ControllerTest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ubcmmhcsoftware.ubcmmhc_web.Controller.UserController;
 import com.ubcmmhcsoftware.ubcmmhc_web.Entity.User;
-import com.ubcmmhcsoftware.ubcmmhc_web.Repository.UserRepository;
 import com.ubcmmhcsoftware.ubcmmhc_web.Service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,10 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 

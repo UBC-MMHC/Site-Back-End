@@ -16,15 +16,16 @@ public class UbcmmhcWebApplication {
 		SpringApplication.run(UbcmmhcWebApplication.class, args);
 	}
 
-    @Bean
-    CommandLineRunner initUsers(UserRepository repository) {
-        return args -> {
-            System.out.println("Creating test users...");
-            repository.save(new User());
-            repository.save(new User());
-            repository.save(new User());
-            System.out.println("Test users created!");
-        };
-    }
+    // Add test users to the database on startup
+//    @Bean
+//    CommandLineRunner initUsers(UserRepository repository) {
+//        return args -> {
+//            System.out.println("Creating test users...");
+//            repository.save(new User());
+//            repository.save(new User());
+//            repository.save(new User());
+//            System.out.println("Test users created!");
+//        };
+//    }
 
 }
