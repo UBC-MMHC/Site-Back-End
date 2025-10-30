@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: ubcmmhc-web
+  profiles:
+    active: dev
+  security:
+    oauth2:
+      client:
+          registration:
+            google:
+              clientId: ${GOOGLE_CLIENT_ID}
+              clientSecret: ${GOOGLE_CLIENT_SECRET}
+              authorization-grant-type: authorization_code
+              redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+              scope:
+                - email
+                - profile
+  jwt:
+    secret: ${JWT_SECRET_TOKEN}
+
+logging:
+  level:
+    org:
+      springframework:
+        security: INFO
