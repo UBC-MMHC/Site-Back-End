@@ -2,7 +2,6 @@ package com.ubcmmhcsoftware.ubcmmhc_web.Service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -24,7 +23,6 @@ public class JWTService {
 
     public String generateToken(String email) {
         Instant now = Instant.now();
-
         Instant expiry = now.plusSeconds(secondsToAdd);
 
         return Jwts.builder()
@@ -47,5 +45,19 @@ public class JWTService {
                 .parseSignedClaims(token)
                 .getPayload();
         return claimsResolver.apply(claims);
+    }
+
+    public boolean isTokenValid(String token, String email) {
+        String tokenEmail = extractEmail(token);
+        return (tokenEmail.equals(email) && !isTokenExpired(token));
+    }
+
+    private boolean isTokenExpired(String token) {
+        Date expiration = extractClaim(token, Claims::getExpiration);
+        return expiration.before(new Date());
+    }
+
+    public String extractEmail(String token) {
+        return extractClaim(token, Claims::getSubject);
     }
 }
