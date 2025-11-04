@@ -1,6 +1,9 @@
 package com.ubcmmhcsoftware.ubcmmhc_web;
 
+import com.ubcmmhcsoftware.ubcmmhc_web.Entity.Role;
 import com.ubcmmhcsoftware.ubcmmhc_web.Entity.User;
+import com.ubcmmhcsoftware.ubcmmhc_web.Enum.RoleEnum;
+import com.ubcmmhcsoftware.ubcmmhc_web.Repository.RoleRepository;
 import com.ubcmmhcsoftware.ubcmmhc_web.Repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -25,6 +28,22 @@ public class UbcmmhcWebApplication {
 //            repository.save(new User());
 //            repository.save(new User());
 //            System.out.println("Test users created!");
+//        };
+//    }
+
+    // Pre ADD roles to database
+//    @Bean
+//    CommandLineRunner initRoles(RoleRepository roleRepository) {
+//        return args -> {
+//            if (roleRepository.existsByName(RoleEnum.ROLE_USER)) {
+//                roleRepository.save(new Role(RoleEnum.ROLE_USER));
+//            }
+//            if (roleRepository.existsByName(RoleEnum.ROLE_ADMIN)) {
+//                roleRepository.save(new Role(RoleEnum.ROLE_ADMIN));
+//            }
+//            if (roleRepository.existsByName(RoleEnum.ROLE_SUPERADMIN)) {
+//                roleRepository.save(new Role(RoleEnum.ROLE_SUPERADMIN));
+//            }
 //        };
 //    }
 

@@ -1,6 +1,7 @@
 package com.ubcmmhcsoftware.ubcmmhc_web.Config;
 
 import com.ubcmmhcsoftware.ubcmmhc_web.Repository.UserRepository;
+import com.ubcmmhcsoftware.ubcmmhc_web.Service.CustomUserDetailsService;
 import com.ubcmmhcsoftware.ubcmmhc_web.Service.JWTService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -9,7 +10,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -29,11 +32,12 @@ public class SecurityConfig {
     private final JWTService jwtService;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JWTAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(cors()))
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -61,7 +65,10 @@ public class SecurityConfig {
             OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
             String email = oauthUser.getAttribute("email");
 
-            String token = jwtService.generateToken(email);
+            // Here have to use email since google sends email, name.....
+            CustomUserDetails user = customUserDetailsService.loadUserByUsername(email);
+
+            String token = jwtService.generateToken(user);
 
             Cookie cookie = new Cookie("token", token);
             response.setStatus(HttpServletResponse.SC_FOUND);

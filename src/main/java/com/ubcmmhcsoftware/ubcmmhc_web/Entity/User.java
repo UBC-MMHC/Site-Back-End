@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -23,9 +25,11 @@ public class User {
     @Column(unique = true)
     private String email;
     private String password;
-    // ENUM
     private String name;
 
-    private String role;
-
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "user_roles",
+            joinColumns = @JoinColumn(name = "users_id"),
+            inverseJoinColumns = @JoinColumn(name = "roles_id"))
+    private Set<Role> user_roles = new HashSet<>();
 }
