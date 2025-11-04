@@ -29,4 +29,20 @@ public class UbcmmhcWebApplication {
         };
     }
 
+    // Pre ADD roles to database
+//    @Bean
+//    CommandLineRunner initRoles(RoleRepository roleRepository) {
+//        return args -> {
+//            if (roleRepository.existsByName(RoleEnum.ROLE_USER)) {
+//                roleRepository.save(new Role(RoleEnum.ROLE_USER));
+//            }
+//            if (roleRepository.existsByName(RoleEnum.ROLE_ADMIN)) {
+//                roleRepository.save(new Role(RoleEnum.ROLE_ADMIN));
+//            }
+//            if (roleRepository.existsByName(RoleEnum.ROLE_SUPERADMIN)) {
+//                roleRepository.save(new Role(RoleEnum.ROLE_SUPERADMIN));
+//            }
+//        };
+//    }
+
 }
