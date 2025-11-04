@@ -43,8 +43,12 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().authenticated()
+                )
+                .exceptionHandling(exception -> exception
+                        .accessDeniedHandler(new CustomAccessDeniedHandler())
                 )
                 .oauth2Login(oauth -> oauth
                         .userInfoEndpoint(userInfo -> userInfo
@@ -78,14 +82,14 @@ public class SecurityConfig {
             cookie.setMaxAge(120 * 60 * 60);
             response.addCookie(cookie);
 
-            response.sendRedirect("http://localhost:3000");
+            response.sendRedirect(URLConstant.FRONTEND_URL);
         };
     }
 
     @Bean
     CorsConfigurationSource cors() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000"));
+        config.setAllowedOrigins(List.of(URLConstant.FRONTEND_URL));
         config.setAllowCredentials(true);
         config.setAllowedMethods(List.of("GET","POST","PUT","DELETE"));
         config.setAllowedHeaders(List.of("*"));

@@ -31,7 +31,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     public CustomUserDetails loadUserById(UUID id) {
-        Optional<User> user = userRepository.findUserById(id);
+        Optional<User> user = userRepository.findUserByIdWithRoles(id);
 
         if (user.isPresent()) {
             return new CustomUserDetails(user.get());

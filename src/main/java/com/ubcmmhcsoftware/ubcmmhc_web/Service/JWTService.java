@@ -16,6 +16,7 @@ import java.util.function.Function;
 
 @Service
 public class JWTService {
+    // Approx 500 hours
     private static final int secondsToAdd = 60 * 60 * 24 * 24;
     private static SecretKey key;
 
