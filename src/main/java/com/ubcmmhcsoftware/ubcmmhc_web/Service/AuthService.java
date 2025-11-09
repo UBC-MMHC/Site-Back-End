@@ -1,6 +1,7 @@
 package com.ubcmmhcsoftware.ubcmmhc_web.Service;
 
 import com.ubcmmhcsoftware.ubcmmhc_web.Config.CustomUserDetails;
+import com.ubcmmhcsoftware.ubcmmhc_web.Config.URLConstant;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.LoginDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.VerificationDto;
 import com.ubcmmhcsoftware.ubcmmhc_web.Entity.User;
@@ -14,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.HandlerMapping;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.Optional;
 import java.util.Random;
@@ -43,7 +46,15 @@ public class AuthService {
         VerificationToken verificationToken = new VerificationToken(token, user, 10);
         verificationTokenRepository.save(verificationToken);
 
-        emailService.sendEmail(loginDTO.getEmail(), "Your Login Code", "Your code is: " + token);
+        String verificationUrl = URLConstant.FRONTEND_URL+"/verify";
+        String link = String.format("%s?email=%s&token=%s",
+                verificationUrl,
+                URLEncoder.encode(user.getEmail(), StandardCharsets.UTF_8),
+                URLEncoder.encode(token, StandardCharsets.UTF_8));
+
+        String email = "Click this link to login: \n \n" + link;
+
+        emailService.sendEmail(loginDTO.getEmail(), "Your Login Code", email);
     }
 
 

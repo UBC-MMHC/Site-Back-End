@@ -61,30 +61,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
-//    @Bean
-//    public AuthenticationSuccessHandler successHandler() {
-//        return (request, response, authentication) -> {
-//            OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
-//            String email = oauthUser.getAttribute("email");
-//
-//            // Here have to use email since google sends email, name.....
-//            CustomUserDetails user = customUserDetailsService.loadUserByUsername(email);
-//
-//            String token = jwtService.generateToken(user);
-//
-//            Cookie cookie = new Cookie("token", token);
-//            response.setStatus(HttpServletResponse.SC_FOUND);
-//            cookie.setHttpOnly(true);
-//            cookie.setSecure(false);
-//            cookie.setPath("/");
-//            cookie.setMaxAge(120 * 60 * 60);
-//            response.addCookie(cookie);
-//
-//            response.sendRedirect(URLConstant.FRONTEND_URL);
-//        };
-//    }
-
     @Bean
     CorsConfigurationSource cors() {
         CorsConfiguration config = new CorsConfiguration();
