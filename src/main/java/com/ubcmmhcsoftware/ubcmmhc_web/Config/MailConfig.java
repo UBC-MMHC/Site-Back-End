@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import java.util.Properties;
 
 
-
 @Component
 public class MailConfig {
     @Value("${spring.mail.username}")
@@ -17,6 +16,7 @@ public class MailConfig {
 
     @Value("${spring.mail.password}")
     private String password;
+
     @Bean
     public JavaMailSender getJavaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
