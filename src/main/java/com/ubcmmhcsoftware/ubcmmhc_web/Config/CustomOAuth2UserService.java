@@ -18,10 +18,10 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
-    private final  UserRepository userRepository;
+    private final UserRepository userRepository;
     private final RoleRepository roleRepository;
 
-    // in future if we want to use/add github auth along with google we can implmement here
+    // in future if we want to use/add github auth along with google or safari we can implmement here
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oauthUser = new DefaultOAuth2UserService().loadUser(userRequest);

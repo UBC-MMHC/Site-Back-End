@@ -30,6 +30,7 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body("Verification token sent to email.");
     }
 
+    // Verifies token, send JWT token to cookies and redirects to base_url
     @PostMapping("/verify-token")
     public ResponseEntity<?> verifyToken(@RequestBody VerificationDto verificationDto, HttpServletResponse response) throws IOException, ServletException {
         CustomUserDetails user = authService.verifyLoginCode(verificationDto);

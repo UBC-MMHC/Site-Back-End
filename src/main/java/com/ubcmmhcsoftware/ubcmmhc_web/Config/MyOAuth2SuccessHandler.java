@@ -19,6 +19,7 @@ public class MyOAuth2SuccessHandler implements AuthenticationSuccessHandler {
     private final CustomUserDetailsService customUserDetailsService;
     private final AuthResponsiveService authResponsiveService;
 
+    // Once authenticated using Oauth2 call handlSuccessfulAuthentication(""")
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();

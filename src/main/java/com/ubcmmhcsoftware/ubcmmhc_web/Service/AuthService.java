@@ -46,6 +46,8 @@ public class AuthService {
         emailService.sendEmail(loginDTO.getEmail(), "Your Login Code", "Your code is: " + token);
     }
 
+
+    // Verifies verification code
     @Transactional
     public CustomUserDetails verifyLoginCode(VerificationDto verificationDto) {
         Optional<VerificationToken> token = verificationTokenRepository.findByToken(verificationDto.getToken());

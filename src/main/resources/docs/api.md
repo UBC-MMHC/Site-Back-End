@@ -8,7 +8,8 @@ This document describes the endpoints for this app
 
 **Endpoint:**\
 Trigger Google Login:
-"http://localhost:8080/oauth2/authorization/google" 
+"http://localhost:8080/oauth2/authorization/google"
+Upon successful call, JWTToken is stored in cookies and page redirected to FRONTEND_URL
 
 ## Start Username, Password Login
 
@@ -23,9 +24,11 @@ Send Json:
 }
 ```
 After login, user gets redirected to verification page.\
-Frontend should hold onto email to send with next call.\
-Verification token is sent to email and upon typing and submitting code,\
-We call:
+**Frontend** should **hold onto email** to send with next call.
+
+
+Verification token is sent to email and upon typing and submitting verification code,\
+Verify Token:  (Post Mapping)
 [http://localhost:8080/api/auth/verify-token](http://localhost:8080/api/auth/verify-token)
 
 Send Json:
@@ -36,8 +39,7 @@ Send Json:
 }
 
 ```
-
-Upon success we redirect to FRONTEND_URL
+Upon successful call, JWTToken is stored in cookies and page redirected to FRONTEND_URL
 
 
 

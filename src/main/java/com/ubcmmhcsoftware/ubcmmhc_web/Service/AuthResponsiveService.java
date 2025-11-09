@@ -14,6 +14,8 @@ import java.io.IOException;
 public class AuthResponsiveService {
     private final JWTService jwtService;
 
+    // Called when authentication is successful, for google or email verification.
+    // This is where we create JWTToken and set in cookies
     public void handleSuccessfulAuthentication(
             HttpServletResponse httpServletResponse, CustomUserDetails customUserDetails, String redirect)
             throws IOException, ServletException {
