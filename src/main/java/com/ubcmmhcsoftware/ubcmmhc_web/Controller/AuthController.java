@@ -26,7 +26,7 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body("Verification token sent to email.");
     }
 
-    @GetMapping("/verify-token")
+    @PostMapping("/verify-token")
     public ResponseEntity<?> verifyToken(@RequestBody VerificationDto verificationDto, HttpServletResponse response) throws IOException {
 
         CustomUserDetails user = authService.verifyLoginCode(verificationDto);

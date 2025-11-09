@@ -1,7 +1,6 @@
 package com.ubcmmhcsoftware.ubcmmhc_web.Service;
 
 import com.ubcmmhcsoftware.ubcmmhc_web.Config.CustomUserDetails;
-import com.ubcmmhcsoftware.ubcmmhc_web.Config.URLConstant;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.LoginDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.VerificationDto;
 import com.ubcmmhcsoftware.ubcmmhc_web.Entity.User;
@@ -9,14 +8,10 @@ import com.ubcmmhcsoftware.ubcmmhc_web.Entity.VerificationToken;
 import com.ubcmmhcsoftware.ubcmmhc_web.Repository.UserRepository;
 import com.ubcmmhcsoftware.ubcmmhc_web.Repository.VerificationTokenRepository;
 import jakarta.mail.MessagingException;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.HandlerMapping;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
 import java.util.Optional;
@@ -55,6 +50,8 @@ public class AuthService {
         if (token.isPresent()) {
             CustomUserDetails user = customUserDetailsService.loadUserByUsername(token.get().getUser().getEmail());
             if (user.getUsername().equals(verificationDto.getEmail())) {
+                System.out.println(verificationDto.getToken());
+                verificationTokenRepository.deleteByToken(verificationDto.getToken());
                 return user;
             }
         }
