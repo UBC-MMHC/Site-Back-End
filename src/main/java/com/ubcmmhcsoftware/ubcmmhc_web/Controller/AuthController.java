@@ -6,6 +6,7 @@ import com.ubcmmhcsoftware.ubcmmhc_web.DTO.LoginDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.VerificationDto;
 import com.ubcmmhcsoftware.ubcmmhc_web.Service.AuthResponsiveService;
 import com.ubcmmhcsoftware.ubcmmhc_web.Service.AuthService;
+import jakarta.mail.AuthenticationFailedException;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,18 +34,16 @@ public class AuthController {
 
     // Verifies token, send JWT token to cookies and redirects to base_url
     @PostMapping("/verify-token")
-    public ResponseEntity<?> verifyToken(@RequestBody VerificationDto verificationDto, HttpServletResponse response) throws IOException, ServletException {
+    public ResponseEntity<?> verifyToken(@RequestBody VerificationDto verificationDto, HttpServletResponse response) throws IOException, ServletException, AuthenticationFailedException {
         CustomUserDetails user = authService.verifyLoginCode(verificationDto);
 
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token not found or invalid");
         }
 
-        String newRedirectUrl = URLConstant.FRONTEND_URL;
+        authResponsiveService.handleSuccessfulAuthentication(response, user, null);
 
-        authResponsiveService.handleSuccessfulAuthentication(response, user, newRedirectUrl);
-
-        return null;
+        return ResponseEntity.ok(Map.of("redirectUrl", URLConstant.REDIRECT_AFTER_LOGIN));
     }
 
 

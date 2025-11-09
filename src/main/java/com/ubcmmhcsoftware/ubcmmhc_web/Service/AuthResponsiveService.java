@@ -17,7 +17,7 @@ public class AuthResponsiveService {
     // Called when authentication is successful, for google or email verification.
     // This is where we create JWTToken and set in cookies
     public void handleSuccessfulAuthentication(
-            HttpServletResponse httpServletResponse, CustomUserDetails customUserDetails, String redirect)
+            HttpServletResponse response, CustomUserDetails customUserDetails, String redirect)
             throws IOException, ServletException {
 
         String jwtToken = jwtService.generateToken(customUserDetails);
@@ -28,9 +28,12 @@ public class AuthResponsiveService {
         jwtCookie.setMaxAge(3600);
         jwtCookie.setSecure(false); //TODO with in prod HTTPS Req
 
-        httpServletResponse.addCookie(jwtCookie);
+        response.addCookie(jwtCookie);
 
-        httpServletResponse.setStatus(HttpServletResponse.SC_FOUND);
-        httpServletResponse.sendRedirect(redirect);
+//        response.setStatus(HttpServletResponse.SC_FOUND);
+        if (redirect != null && !redirect.isEmpty()) {
+            response.sendRedirect(redirect);
+        }
+
     }
 }

@@ -23,11 +23,11 @@ Send Json:
     "email": "email"
 }
 ```
-After login, user gets redirected to verification page.\
+After login, user gets redirected to verification page and a email with link is sent to inbox.\
 **Frontend** should **hold onto email** to send with next call.
 
 
-Verification token is sent to email and upon typing and submitting verification code,\
+Verification link is sent to email and upon clicking verify and redirect to main page,\
 Verify Token:  (Post Mapping)
 [http://localhost:8080/api/auth/verify-token](http://localhost:8080/api/auth/verify-token)
 

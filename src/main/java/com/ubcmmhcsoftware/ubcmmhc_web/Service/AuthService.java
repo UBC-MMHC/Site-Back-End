@@ -8,8 +8,10 @@ import com.ubcmmhcsoftware.ubcmmhc_web.Entity.User;
 import com.ubcmmhcsoftware.ubcmmhc_web.Entity.VerificationToken;
 import com.ubcmmhcsoftware.ubcmmhc_web.Repository.UserRepository;
 import com.ubcmmhcsoftware.ubcmmhc_web.Repository.VerificationTokenRepository;
+import jakarta.mail.AuthenticationFailedException;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.ott.InvalidOneTimeTokenException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.HandlerMapping;
@@ -18,6 +20,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.chrono.ChronoLocalDate;
 import java.util.Optional;
 import java.util.Random;
 
@@ -60,18 +65,23 @@ public class AuthService {
 
     // Verifies verification code
     @Transactional
-    public CustomUserDetails verifyLoginCode(VerificationDto verificationDto) {
+    public CustomUserDetails verifyLoginCode(VerificationDto verificationDto) throws AuthenticationFailedException {
         Optional<VerificationToken> token = verificationTokenRepository.findByToken(verificationDto.getToken());
-        if (token.isPresent()) {
-            CustomUserDetails user = customUserDetailsService.loadUserByUsername(token.get().getUser().getEmail());
-            if (user.getUsername().equals(verificationDto.getEmail())) {
-//                System.out.println(verificationDto.getToken());
-                verificationTokenRepository.deleteByUser_Email(verificationDto.getEmail());
-                return user;
-            }
+
+        if (token.isEmpty()) {
+            throw new InvalidOneTimeTokenException("Invalid token");
         }
 
-        return null;
+        if (Instant.now().isAfter(token.get().getExpiryDate())) {
+            verificationTokenRepository.deleteById(token.get().getId());
+            throw new InvalidOneTimeTokenException("Token is expired");
+        }
+
+        if (!token.get().getUser().getEmail().equals(verificationDto.getEmail())) throw new AuthenticationFailedException("Email not valid");
+
+        CustomUserDetails user = customUserDetailsService.loadUserByUsername(token.get().getUser().getEmail());
+        verificationTokenRepository.deleteByUser_Email(verificationDto.getEmail());
+        return user;
     }
 
     // Creates 6 digit code
