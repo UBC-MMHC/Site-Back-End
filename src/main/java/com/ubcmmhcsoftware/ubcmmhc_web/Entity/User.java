@@ -12,19 +12,18 @@ import java.util.UUID;
 
 @Entity
 @Data
-@NoArgsConstructor @AllArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
     @Column(unique = true)
     private String googleId;
     @Column(unique = true)
     private String email;
-    private String password;
     private String name;
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -32,4 +31,11 @@ public class User {
             joinColumns = @JoinColumn(name = "users_id"),
             inverseJoinColumns = @JoinColumn(name = "roles_id"))
     private Set<Role> user_roles = new HashSet<>();
+
+    @OneToOne(fetch = FetchType.LAZY)
+    private VerificationToken verificationToken;
+
+    public User(String email) {
+        this.email = email;
+    }
 }

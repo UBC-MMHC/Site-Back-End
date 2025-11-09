@@ -19,12 +19,6 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/all")
-    @PreAuthorize("hasRole('SUPERADMIN')")
-    public List<User> findAllUsers() {
-        return userService.findAllUsers();
-    }
-
     // Views all information being sent from whatever authenticator
     @GetMapping("/info")
     @PreAuthorize("hasRole('USER')")

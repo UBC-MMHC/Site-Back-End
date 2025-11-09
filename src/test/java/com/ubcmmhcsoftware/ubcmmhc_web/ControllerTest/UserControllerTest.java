@@ -47,7 +47,6 @@ public class UserControllerTest {
 
     @Test
     void getAndReturnAllUsers() throws Exception {
-        when(userService.findAllUsers()).thenReturn(testUsers);
 
         mockMvc.perform(get("/user-api/users"))
                 .andExpect(status().isOk())

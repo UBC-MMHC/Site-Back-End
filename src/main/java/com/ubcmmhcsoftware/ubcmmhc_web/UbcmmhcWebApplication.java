@@ -19,32 +19,14 @@ public class UbcmmhcWebApplication {
 		SpringApplication.run(UbcmmhcWebApplication.class, args);
 	}
 
-    // Add test users to the database on startup
-//    @Bean
-//    CommandLineRunner initUsers(UserRepository repository) {
-//        return args -> {
-//            System.out.println("Creating test users...");
-//            repository.save(new User());
-//            repository.save(new User());
-//            repository.save(new User());
-//            System.out.println("Test users created!");
-//        };
-//    }
-
     // Pre ADD roles to database
-//    @Bean
-//    CommandLineRunner initRoles(RoleRepository roleRepository) {
-//        return args -> {
-//            if (roleRepository.existsByName(RoleEnum.ROLE_USER)) {
+    @Bean
+    CommandLineRunner initRoles(RoleRepository roleRepository) {
+        return args -> {
 //                roleRepository.save(new Role(RoleEnum.ROLE_USER));
-//            }
-//            if (roleRepository.existsByName(RoleEnum.ROLE_ADMIN)) {
 //                roleRepository.save(new Role(RoleEnum.ROLE_ADMIN));
-//            }
-//            if (roleRepository.existsByName(RoleEnum.ROLE_SUPERADMIN)) {
 //                roleRepository.save(new Role(RoleEnum.ROLE_SUPERADMIN));
-//            }
-//        };
-//    }
+        };
+    }
 
 }

@@ -1,6 +1,5 @@
 package com.ubcmmhcsoftware.ubcmmhc_web.Config;
 
-import com.ubcmmhcsoftware.ubcmmhc_web.Repository.UserRepository;
 import com.ubcmmhcsoftware.ubcmmhc_web.Service.CustomUserDetailsService;
 import com.ubcmmhcsoftware.ubcmmhc_web.Service.JWTService;
 import jakarta.servlet.http.Cookie;
@@ -12,7 +11,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -28,7 +28,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final UserRepository userRepository;
     private final JWTService jwtService;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JWTAuthenticationFilter jwtAuthenticationFilter;
@@ -42,9 +41,9 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/**").authenticated()
+//                        .requestMatchers("/api/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception
@@ -97,6 +96,11 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
 }
