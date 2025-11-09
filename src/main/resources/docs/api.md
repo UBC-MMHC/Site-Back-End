@@ -16,7 +16,7 @@ Upon successful call, JWTToken is stored in cookies and page redirected to FRONT
 ### FOR FUTURE
 **Endpoint:**\
 User Login: (Post Mapping)
-[http://localhost:8080/api/auth/login](http://localhost:8080/api/auth/login-email)\
+[http://localhost:8080/api/auth/login-email](http://localhost:8080/api/auth/login-email)\
 Send Json: 
 ```json
 { 
