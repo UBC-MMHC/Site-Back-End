@@ -10,6 +10,7 @@ import com.ubcmmhcsoftware.ubcmmhc_web.Repository.VerificationTokenRepository;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.HandlerMapping;
 
 import java.io.UnsupportedEncodingException;
@@ -45,34 +46,20 @@ public class AuthService {
         emailService.sendEmail(loginDTO.getEmail(), "Your Login Code", "Your code is: " + token);
     }
 
+    @Transactional
     public CustomUserDetails verifyLoginCode(VerificationDto verificationDto) {
         Optional<VerificationToken> token = verificationTokenRepository.findByToken(verificationDto.getToken());
         if (token.isPresent()) {
             CustomUserDetails user = customUserDetailsService.loadUserByUsername(token.get().getUser().getEmail());
             if (user.getUsername().equals(verificationDto.getEmail())) {
-                System.out.println(verificationDto.getToken());
-                verificationTokenRepository.deleteByToken(verificationDto.getToken());
+//                System.out.println(verificationDto.getToken());
+                verificationTokenRepository.deleteByUser_Email(verificationDto.getEmail());
                 return user;
             }
         }
 
         return null;
     }
-
-//    public void handleSuccessfulAuthentication(HttpServletResponse response, CustomUserDetails user) throws IOException {
-//        String jwtToken = jWTService.generateToken(user);
-//        Cookie cookie = new Cookie("token", jwtToken);
-//        cookie.setHttpOnly(true);
-//        cookie.setSecure(false); // TODO: Set to true in production (requires HTTPS)
-//        cookie.setPath("/");
-//        cookie.setMaxAge(120 * 60 * 60);
-//
-//        response.addCookie(cookie);
-//
-//        response.setStatus(HttpServletResponse.SC_FOUND);
-//        response.sendRedirect(URLConstant.FRONTEND_URL);
-//    }
-
 
     // Creates 6 digit code
     private String generateVerificationToken() {

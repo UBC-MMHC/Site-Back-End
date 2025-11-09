@@ -1,10 +1,13 @@
 package com.ubcmmhcsoftware.ubcmmhc_web.Controller;
 
 import com.ubcmmhcsoftware.ubcmmhc_web.Config.CustomUserDetails;
+import com.ubcmmhcsoftware.ubcmmhc_web.Config.URLConstant;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.LoginDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.VerificationDto;
+import com.ubcmmhcsoftware.ubcmmhc_web.Service.AuthResponsiveService;
 import com.ubcmmhcsoftware.ubcmmhc_web.Service.AuthService;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,6 +22,7 @@ import java.io.UnsupportedEncodingException;
 @RequestMapping("/api/auth")
 public class AuthController {
     private final AuthService authService;
+    private final AuthResponsiveService authResponsiveService;
 
     @PostMapping("/login-email")
     public ResponseEntity<?> login(@RequestBody LoginDTO loginDto) throws MessagingException, UnsupportedEncodingException {
@@ -27,13 +31,16 @@ public class AuthController {
     }
 
     @PostMapping("/verify-token")
-    public ResponseEntity<?> verifyToken(@RequestBody VerificationDto verificationDto, HttpServletResponse response) throws IOException {
-
+    public ResponseEntity<?> verifyToken(@RequestBody VerificationDto verificationDto, HttpServletResponse response) throws IOException, ServletException {
         CustomUserDetails user = authService.verifyLoginCode(verificationDto);
 
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token not found or invalid");
         }
+
+        String newRedirectUrl = URLConstant.FRONTEND_URL;
+
+        authResponsiveService.handleSuccessfulAuthentication(response, user, newRedirectUrl);
 
         return null;
     }

@@ -32,6 +32,7 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JWTAuthenticationFilter jwtAuthenticationFilter;
     private final CustomUserDetailsService customUserDetailsService;
+    private final MyOAuth2SuccessHandler myOAuth2SuccessHandler;
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -53,37 +54,36 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )
-                        .successHandler(successHandler())
+                        .successHandler(myOAuth2SuccessHandler)
                 );
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-
         return http.build();
     }
 
-    @Bean
-    public AuthenticationSuccessHandler successHandler() {
-        return (request, response, authentication) -> {
-            OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
-            String email = oauthUser.getAttribute("email");
-
-            // Here have to use email since google sends email, name.....
-            CustomUserDetails user = customUserDetailsService.loadUserByUsername(email);
-
-            String token = jwtService.generateToken(user);
-
-            Cookie cookie = new Cookie("token", token);
-            response.setStatus(HttpServletResponse.SC_FOUND);
-            cookie.setHttpOnly(true);
-            cookie.setSecure(false);
-            cookie.setPath("/");
-            cookie.setMaxAge(120 * 60 * 60);
-            response.addCookie(cookie);
-
-            response.sendRedirect(URLConstant.FRONTEND_URL);
-        };
-    }
+//    @Bean
+//    public AuthenticationSuccessHandler successHandler() {
+//        return (request, response, authentication) -> {
+//            OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
+//            String email = oauthUser.getAttribute("email");
+//
+//            // Here have to use email since google sends email, name.....
+//            CustomUserDetails user = customUserDetailsService.loadUserByUsername(email);
+//
+//            String token = jwtService.generateToken(user);
+//
+//            Cookie cookie = new Cookie("token", token);
+//            response.setStatus(HttpServletResponse.SC_FOUND);
+//            cookie.setHttpOnly(true);
+//            cookie.setSecure(false);
+//            cookie.setPath("/");
+//            cookie.setMaxAge(120 * 60 * 60);
+//            response.addCookie(cookie);
+//
+//            response.sendRedirect(URLConstant.FRONTEND_URL);
+//        };
+//    }
 
     @Bean
     CorsConfigurationSource cors() {
