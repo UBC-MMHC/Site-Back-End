@@ -21,21 +21,18 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.chrono.ChronoLocalDate;
 import java.util.Optional;
 import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+    // Time for token expiration 10 * 60 seconds = 6 minutes
+    private final int TOKEN_EXPIRATION_TIME = 60;
     private final UserRepository userRepository;
     private final VerificationTokenRepository verificationTokenRepository;
     private final EmailService emailService;
-    private final JWTService jWTService;
     private final CustomUserDetailsService customUserDetailsService;
-    private final HandlerMapping resourceHandlerMapping;
-
 
     // upon login we check if user is registered if no, register them, then we generate token and email it
     public void requestLoginCode(LoginDTO loginDTO) throws MessagingException, UnsupportedEncodingException {
@@ -48,10 +45,10 @@ public class AuthService {
 
         String token = generateVerificationToken();
 
-        VerificationToken verificationToken = new VerificationToken(token, user, 10);
+        VerificationToken verificationToken = new VerificationToken(token, user, TOKEN_EXPIRATION_TIME);
         verificationTokenRepository.save(verificationToken);
 
-        String verificationUrl = URLConstant.FRONTEND_URL+"/verify";
+        String verificationUrl = URLConstant.FRONTEND_URL + "/verify";
         String link = String.format("%s?email=%s&token=%s",
                 verificationUrl,
                 URLEncoder.encode(user.getEmail(), StandardCharsets.UTF_8),
@@ -77,7 +74,8 @@ public class AuthService {
             throw new InvalidOneTimeTokenException("Token is expired");
         }
 
-        if (!token.get().getUser().getEmail().equals(verificationDto.getEmail())) throw new AuthenticationFailedException("Email not valid");
+        if (!token.get().getUser().getEmail().equals(verificationDto.getEmail()))
+            throw new AuthenticationFailedException("Email not valid");
 
         CustomUserDetails user = customUserDetailsService.loadUserByUsername(token.get().getUser().getEmail());
         verificationTokenRepository.deleteByUser_Email(verificationDto.getEmail());
