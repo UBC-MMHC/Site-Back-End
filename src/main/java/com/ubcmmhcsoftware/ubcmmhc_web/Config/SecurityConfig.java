@@ -3,6 +3,7 @@ package com.ubcmmhcsoftware.ubcmmhc_web.Config;
 import com.ubcmmhcsoftware.ubcmmhc_web.Service.CustomUserDetailsService;
 import com.ubcmmhcsoftware.ubcmmhc_web.Service.JWTService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
