@@ -54,9 +54,9 @@ public class AuthService {
                 URLEncoder.encode(user.getEmail(), StandardCharsets.UTF_8),
                 URLEncoder.encode(token, StandardCharsets.UTF_8));
 
-        String email = "Click this link to login: \n \n" + link;
+//        String email = "Click this link to login: \n \n" + link;
 
-        emailService.sendEmail(loginDTO.getEmail(), "Your Login Code", email);
+        emailService.sendEmail(loginDTO.getEmail(), "Your Login Code", link );
     }
 
 
