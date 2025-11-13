@@ -17,10 +17,13 @@ public class MailConfig {
     @Value("${spring.mail.password}")
     private String password;
 
+    @Value("${spring.mail.host}")
+    private String host;
+
     @Bean
     public JavaMailSender getJavaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost("smtp.gmail.com");
+        mailSender.setHost(host);
         mailSender.setPort(587);
 
         mailSender.setUsername(username);
