@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+// Limits # of api requests a user can make per minute
 @Component
 public class RateLimitingFilter implements Filter {
     private static final int MAX_REQUESTS_PER_WINDOW = 5; // 5 requests
