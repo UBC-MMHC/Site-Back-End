@@ -15,7 +15,6 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
 
-    // TODO Make so login url is a button instead of url
     public void sendEmail(String to, String subject, String text) throws MessagingException, UnsupportedEncodingException {
         MimeMessage message = mailSender.createMimeMessage();
 
