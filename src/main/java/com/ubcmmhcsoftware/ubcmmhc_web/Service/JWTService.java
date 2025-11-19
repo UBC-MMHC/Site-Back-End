@@ -1,9 +1,11 @@
 package com.ubcmmhcsoftware.ubcmmhc_web.Service;
 
+import com.ubcmmhcsoftware.ubcmmhc_web.Config.CustomUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -14,6 +16,7 @@ import java.util.function.Function;
 
 @Service
 public class JWTService {
+    // Approx 500 hours
     private static final int secondsToAdd = 60 * 60 * 24 * 24;
     private static SecretKey key;
 
@@ -21,7 +24,7 @@ public class JWTService {
         key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateToken(String email) {
+    public String generateToken(CustomUserDetails userDetails) {
         Instant now = Instant.now();
         Instant expiry = now.plusSeconds(secondsToAdd);
 
@@ -29,11 +32,13 @@ public class JWTService {
                 .header()
                 .type("JWT")
                 .and()
-                .claims()
-                .subject(email)
+                .subject(userDetails.getId().toString())
+                .claim("roles", userDetails.getAuthorities()
+                        .stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .toList())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiry))
-                .and()
                 .signWith(key, Jwts.SIG.HS256)
                 .compact();
     }
@@ -47,9 +52,9 @@ public class JWTService {
         return claimsResolver.apply(claims);
     }
 
-    public boolean isTokenValid(String token, String email) {
-        String tokenEmail = extractEmail(token);
-        return (tokenEmail.equals(email) && !isTokenExpired(token));
+    public boolean isTokenValid(String token, String id) {
+        String tokenId = extractId(token);
+        return (tokenId.equals(id) && !isTokenExpired(token));
     }
 
     private boolean isTokenExpired(String token) {
@@ -57,7 +62,7 @@ public class JWTService {
         return expiration.before(new Date());
     }
 
-    public String extractEmail(String token) {
+    public String extractId(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 }
