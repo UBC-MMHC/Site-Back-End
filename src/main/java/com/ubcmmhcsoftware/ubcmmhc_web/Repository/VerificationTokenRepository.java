@@ -11,7 +11,5 @@ import java.util.UUID;
 public interface VerificationTokenRepository extends JpaRepository<VerificationToken, UUID> {
     Optional<VerificationToken> findByToken(String token);
 
-    void deleteByToken(String token);
-
     void deleteByUser_Email(String userEmail);
 }

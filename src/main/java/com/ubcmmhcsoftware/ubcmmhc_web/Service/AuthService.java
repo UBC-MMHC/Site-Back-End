@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.ott.InvalidOneTimeTokenException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.servlet.HandlerMapping;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

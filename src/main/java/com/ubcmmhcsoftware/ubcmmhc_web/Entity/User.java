@@ -35,6 +35,12 @@ public class User {
     @OneToOne(fetch = FetchType.LAZY)
     private VerificationToken verificationToken;
 
+    private boolean newsletterSubscription = false; // False by default
+
+    // TODO Future membership implementation
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Membership membership;
+
     public User(String email) {
         this.email = email;
     }

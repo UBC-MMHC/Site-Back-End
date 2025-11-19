@@ -1,6 +1,5 @@
 package com.ubcmmhcsoftware.ubcmmhc_web.Controller;
 
-import com.ubcmmhcsoftware.ubcmmhc_web.Service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -14,8 +13,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RequestMapping("api/user")
 public class UserController {
-
-    private final UserService userService;
 
     // Views all information being sent from whatever authenticator
     @GetMapping("/info")

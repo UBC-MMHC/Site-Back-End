@@ -27,7 +27,7 @@ public class MyOAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
         CustomUserDetails user = customUserDetailsService.loadUserByUsername(email);
 
-        authResponsiveService.handleSuccessfulAuthentication(response, user, URLConstant.FRONTEND_URL);
+        authResponsiveService.handleSuccessfulAuthentication(response, user, URLConstant.REDIRECT_AFTER_LOGIN);
     }
 
 }
