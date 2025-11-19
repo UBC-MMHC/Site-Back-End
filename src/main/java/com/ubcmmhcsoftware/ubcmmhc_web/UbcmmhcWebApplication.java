@@ -23,9 +23,9 @@ public class UbcmmhcWebApplication {
     @Bean
     CommandLineRunner initRoles(RoleRepository roleRepository) {
         return args -> {
-//                roleRepository.save(new Role(RoleEnum.ROLE_USER));
-//                roleRepository.save(new Role(RoleEnum.ROLE_ADMIN));
-//                roleRepository.save(new Role(RoleEnum.ROLE_SUPERADMIN));
+                roleRepository.save(new Role(RoleEnum.ROLE_USER));
+                roleRepository.save(new Role(RoleEnum.ROLE_ADMIN));
+                roleRepository.save(new Role(RoleEnum.ROLE_SUPERADMIN));
         };
     }
 
