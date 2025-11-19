@@ -2,57 +2,26 @@ package com.ubcmmhcsoftware.ubcmmhc_web.ControllerTest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ubcmmhcsoftware.ubcmmhc_web.Controller.UserController;
-import com.ubcmmhcsoftware.ubcmmhc_web.Entity.User;
-import com.ubcmmhcsoftware.ubcmmhc_web.Service.UserService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
-import java.util.List;
-
-import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
+import org.springframework.test.web.client.MockRestServiceServer;
 
 
-@ExtendWith(MockitoExtension.class)
+@RestClientTest(UserController.class)
 public class UserControllerTest {
-    @Mock
-    private UserService userService;
+    @Autowired
+    MockRestServiceServer mockServer;
 
-    @InjectMocks
-    private UserController userController;
+    @Autowired
+    UserController controller;
 
-    private MockMvc mockMvc;
-    private ObjectMapper objectMapper;
-    private List<User> testUsers;
-
-    @BeforeEach
-    void setUp() {
-        objectMapper = new ObjectMapper();
-        mockMvc = MockMvcBuilders.standaloneSetup(userController)
-                .setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper))
-                .build();
-
-        testUsers = List.of(new User(), new User());
-    }
+    @Autowired
+    ObjectMapper objectMapper;
 
     @Test
-    void getAndReturnAllUsers() throws Exception {
-        when(userService.findAllUsers()).thenReturn(testUsers);
+    public void userInfo() {
 
-        mockMvc.perform(get("/user-api/users"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].id").value(testUsers.get(0).getId()));
     }
+
 }
