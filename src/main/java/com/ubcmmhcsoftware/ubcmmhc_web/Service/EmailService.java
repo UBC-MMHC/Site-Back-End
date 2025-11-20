@@ -48,7 +48,7 @@ public class EmailService {
                         "    }" +
                         "    .text {" +
                         "      font-size: 16px;" +
-                        "      color: #444;" +
+                        "      color: #ffffff;" +
                         "      margin-bottom: 24px;" +
                         "    }" +
                         "    .button {" +

@@ -26,6 +26,11 @@ public class User {
     private String email;
     private String name;
 
+    private String instagram;
+    private Boolean instaChat;
+
+    private String studentId;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "users_id"),
