@@ -34,16 +34,14 @@ public class AuthController {
 
     // Verifies token, send JWT token to cookies and redirects to base_url
     @GetMapping("/verify-token")
-    public ResponseEntity<?> verifyToken(@RequestParam("email") String email, @RequestParam("token") String token, HttpServletResponse response) throws IOException, ServletException, AuthenticationFailedException {
+    public void verifyToken(@RequestParam("email") String email, @RequestParam("token") String token, HttpServletResponse response) throws IOException, ServletException, AuthenticationFailedException {
         CustomUserDetails user = authService.verifyLoginCode(email, token);
 
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token not found or invalid");
+            ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token not found or invalid");
         }
 
-        authResponsiveService.handleSuccessfulAuthentication(response, user, null);
-
-        return ResponseEntity.ok(Map.of("redirectUrl", URLConstant.REDIRECT_AFTER_LOGIN));
+        authResponsiveService.handleSuccessfulAuthentication(response, user, URLConstant.REDIRECT_AFTER_LOGIN);
     }
 
 

@@ -80,8 +80,6 @@ public class EmailService {
 
         helper.setText(htmlContent, true); // true = HTML
 
-        System.out.print(text);
-
         mailSender.send(message);
     }
 }
