@@ -47,7 +47,7 @@ public class AuthService {
         VerificationToken verificationToken = new VerificationToken(token, user, TOKEN_EXPIRATION_TIME);
         verificationTokenRepository.save(verificationToken);
 
-        String verificationUrl = URLConstant.FRONTEND_URL + "/verify";
+        String verificationUrl = URLConstant.BACKEND_URL + "/api/auth/verify-token";
         String link = String.format("%s?email=%s&token=%s",
                 verificationUrl,
                 URLEncoder.encode(user.getEmail(), StandardCharsets.UTF_8),
@@ -61,8 +61,8 @@ public class AuthService {
 
     // Verifies verification code
     @Transactional
-    public CustomUserDetails verifyLoginCode(VerificationDto verificationDto) throws AuthenticationFailedException {
-        Optional<VerificationToken> token = verificationTokenRepository.findByToken(verificationDto.getToken());
+    public CustomUserDetails verifyLoginCode(String email, String received_token) throws AuthenticationFailedException {
+        Optional<VerificationToken> token = verificationTokenRepository.findByToken(received_token);
 
         if (token.isEmpty()) {
             throw new InvalidOneTimeTokenException("Invalid token");
@@ -73,11 +73,11 @@ public class AuthService {
             throw new InvalidOneTimeTokenException("Token is expired");
         }
 
-        if (!token.get().getUser().getEmail().equals(verificationDto.getEmail()))
+        if (!token.get().getUser().getEmail().equals(email))
             throw new AuthenticationFailedException("Email not valid");
 
         CustomUserDetails user = customUserDetailsService.loadUserByUsername(token.get().getUser().getEmail());
-        verificationTokenRepository.deleteByUser_Email(verificationDto.getEmail());
+        verificationTokenRepository.deleteByUser_Email(email);
         return user;
     }
 
