@@ -22,4 +22,12 @@ public class Membership {
     private LocalDateTime endDate;
 
     private boolean active;
+
+
+    public Membership() {
+        startDate = LocalDateTime.now();
+
+        // TODO current we need to mannually cahnge this think of better way
+        endDate = LocalDateTime.of(2026, 6, 1, 0, 0);
+    }
 }

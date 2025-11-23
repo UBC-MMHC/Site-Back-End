@@ -4,10 +4,9 @@ import com.ubcmmhcsoftware.ubcmmhc_web.DTO.MemberShipDto;
 import com.ubcmmhcsoftware.ubcmmhc_web.Service.MembershipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,8 +15,9 @@ public class MembershipController {
 
     private final MembershipService membershipService;
 
-    @GetMapping("/register")
+    @PostMapping("/register")
     public ResponseEntity<?> registerMembership(@RequestBody MemberShipDto memberShipDto) {
-        return membershipService.RegisterMember(memberShipDto);
+        membershipService.registerMember(memberShipDto);
+        return ResponseEntity.ok(Map.of("message", "Membership registered successfully"));
     }
 }

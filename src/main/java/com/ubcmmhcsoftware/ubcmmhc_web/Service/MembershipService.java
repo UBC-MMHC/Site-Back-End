@@ -6,24 +6,23 @@ import com.ubcmmhcsoftware.ubcmmhc_web.Entity.User;
 import com.ubcmmhcsoftware.ubcmmhc_web.Repository.MembershipRepository;
 import com.ubcmmhcsoftware.ubcmmhc_web.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @Service
 @RequiredArgsConstructor
 public class MembershipService {
 
     private final UserRepository userRepository;
-
     private final MembershipRepository membershipRepository;
 
     @Transactional
-    public ResponseEntity<?> RegisterMember(MemberShipDto memberShipDto) {
+    public void registerMember(MemberShipDto memberShipDto) {
+
         User user = userRepository.findUserByEmail(memberShipDto.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException(memberShipDto.getEmail()));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + memberShipDto.getEmail()));
 
         if (membershipRepository.existsByUser(user)) {
             throw new RuntimeException("User is already a member");
@@ -37,12 +36,12 @@ public class MembershipService {
             user.setStudentId(memberShipDto.getStudentId());
         }
 
-        // TODO In future call the add to newsletter call
+        // TODO Call newsletter join api
         if (memberShipDto.getNewsletter() != null) {
             user.setNewsletterSubscription(memberShipDto.getNewsletter());
         }
 
-        // TODO In future call the add to instachat call
+        // TODO Call instagram join api
         String insta = memberShipDto.getInstagram();
         if (StringUtils.hasText(insta)) {
             user.setInstagram(insta);
@@ -56,8 +55,5 @@ public class MembershipService {
 
         userRepository.save(user);
         membershipRepository.save(membership);
-
-        return ResponseEntity.ok().build();
     }
-
 }
