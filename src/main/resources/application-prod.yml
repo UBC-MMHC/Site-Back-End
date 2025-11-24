@@ -1,0 +1,32 @@
+spring:
+  config:
+    import: classpath:local.properties
+
+  datasource:
+    url: jdbc:postgresql://${RAILWAY_TCP_PROXY_DOMAIN}:${RAILWAY_TCP_PROXY_PORT}/${POSTGRES_DB}?sslmode=${SSL_MODE}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  mail:
+    host: smtp-relay.brevo.com
+    #If change need to change in MailConfig.java aswell
+    port: 587
+    username: ${SMTP_EMAIL}
+    password: ${SMTP_PASSWORD}
+    protocol: smtp
+    tls: true
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          timeout: 5000
