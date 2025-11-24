@@ -1,6 +1,6 @@
 spring:
   config:
-    import: classpath:local.properties
+    import: optional:file:./local.properties
 
   datasource:
     url: jdbc:postgresql://${RAILWAY_TCP_PROXY_DOMAIN}:${RAILWAY_TCP_PROXY_PORT}/${POSTGRES_DB}?sslmode=${SSL_MODE}
