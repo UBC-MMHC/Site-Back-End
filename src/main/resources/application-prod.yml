@@ -19,7 +19,7 @@ spring:
   mail:
     host: smtp-relay.brevo.com
     #If change need to change in MailConfig.java aswell
-    port: 587
+    port: ${SMTP_PORT}
     username: ${SMTP_EMAIL}
     password: ${SMTP_PASSWORD}
     protocol: smtp
