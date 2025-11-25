@@ -28,6 +28,8 @@ public class AuthResponsiveService {
         jwtCookie.setMaxAge(3600);
         jwtCookie.setSecure(false); //TODO with in prod HTTPS Req
 
+        jwtCookie.setAttribute("SameSite", "Lax");
+
         response.addCookie(jwtCookie);
 
 //        response.setStatus(HttpServletResponse.SC_FOUND);

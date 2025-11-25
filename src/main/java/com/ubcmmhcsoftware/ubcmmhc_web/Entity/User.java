@@ -24,6 +24,8 @@ public class User {
     private String googleId;
     @Column(unique = true)
     private String email;
+    private String password;
+
     private String name;
 
     @ManyToMany(fetch = FetchType.LAZY)
