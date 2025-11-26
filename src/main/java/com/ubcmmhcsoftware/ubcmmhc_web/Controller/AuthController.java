@@ -53,14 +53,21 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("JWT", null);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
+        Cookie jwtCookie = new Cookie("JWT", null);
+        jwtCookie.setHttpOnly(true);
+        jwtCookie.setSecure(false); // TODO: Change to true in Production!
+        jwtCookie.setPath("/");
+        jwtCookie.setMaxAge(0);
 
-        response.addCookie(cookie);
-        return ResponseEntity.status(HttpStatus.OK).body("Logged out successfully");
+        Cookie xsrfCookie = new Cookie("XSRF-TOKEN", null);
+        xsrfCookie.setSecure(false); // TODO: Change to true in Production!
+        xsrfCookie.setPath("/");
+        xsrfCookie.setMaxAge(0);
+
+        response.addCookie(jwtCookie);
+        response.addCookie(xsrfCookie);
+
+        return ResponseEntity.ok("Logged out successfully");
     }
 
     // If in future want password less login can use this
