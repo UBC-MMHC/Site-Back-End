@@ -1,29 +1,21 @@
 package com.ubcmmhcsoftware.ubcmmhc_web.Controller;
 
 import com.ubcmmhcsoftware.ubcmmhc_web.Config.CustomUserDetails;
-import com.ubcmmhcsoftware.ubcmmhc_web.Config.URLConstant;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.LoginDTO;
-import com.ubcmmhcsoftware.ubcmmhc_web.DTO.VerificationDto;
+import com.ubcmmhcsoftware.ubcmmhc_web.DTO.ResetPasswordDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.Service.AuthResponsiveService;
 import com.ubcmmhcsoftware.ubcmmhc_web.Service.AuthService;
-import com.ubcmmhcsoftware.ubcmmhc_web.Service.JWTService;
-import jakarta.mail.AuthenticationFailedException;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.eclipse.angus.mail.iap.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -42,9 +34,33 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO, HttpServletResponse response) throws ServletException, IOException {
         CustomUserDetails user = authService.loginUser(loginDTO);
 
-        authResponsiveService.handleSuccessfulAuthentication(response, user , null);
+        authResponsiveService.handleSuccessfulAuthentication(response, user, null);
 
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestParam String email) throws MessagingException, UnsupportedEncodingException {
+        authService.forgotPassword(email);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO) {
+        authService.resetPassword(resetPasswordDTO.getToken(), resetPasswordDTO.getNewpassword());
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("JWT", null);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+
+        response.addCookie(cookie);
+        return ResponseEntity.status(HttpStatus.OK).body("Logged out successfully");
     }
 
     // If in future want password less login can use this

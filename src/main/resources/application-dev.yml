@@ -42,3 +42,4 @@ spring:
             enable: true
             required: true
           timeout: 5000
+    sender_email: ${SMTP_SENDER_EMAIL}

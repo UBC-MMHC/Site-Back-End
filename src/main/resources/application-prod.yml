@@ -14,8 +14,6 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
-
-
   mail:
     host: smtp-relay.brevo.com
     #If change need to change in MailConfig.java aswell
@@ -23,7 +21,6 @@ spring:
     username: ${SMTP_EMAIL}
     password: ${SMTP_PASSWORD}
     protocol: smtp
-    tls: true
     properties:
       mail:
         smtp:

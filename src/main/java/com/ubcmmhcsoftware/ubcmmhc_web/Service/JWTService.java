@@ -17,8 +17,8 @@ import java.util.function.Function;
 @Service
 public class JWTService {
     // Approx 500 hours
-    private static final int secondsToAdd = 60 * 60 * 24 * 24;
-    private static SecretKey key;
+    private static final long EXPIRATION_TIME = 7L * 24 * 60 * 60 * 1000;
+    private final SecretKey key;
 
     public JWTService(@Value("${spring.jwt.secret}") String secret) {
         key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
@@ -26,7 +26,7 @@ public class JWTService {
 
     public String generateToken(CustomUserDetails userDetails) {
         Instant now = Instant.now();
-        Instant expiry = now.plusSeconds(secondsToAdd);
+        Instant expiry = now.plusSeconds(EXPIRATION_TIME);
 
         return Jwts.builder()
                 .header()

@@ -25,7 +25,8 @@ public class AuthResponsiveService {
         Cookie jwtCookie = new Cookie("JWT", jwtToken);
         jwtCookie.setPath("/");
         jwtCookie.setHttpOnly(true);
-        jwtCookie.setMaxAge(3600);
+        int sevenDaysInSeconds = 7 * 24 * 60 * 60;
+        jwtCookie.setMaxAge(sevenDaysInSeconds);
         jwtCookie.setSecure(false); //TODO with in prod HTTPS Req
 
         jwtCookie.setAttribute("SameSite", "Lax");
