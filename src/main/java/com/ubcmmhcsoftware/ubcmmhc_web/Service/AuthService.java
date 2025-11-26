@@ -6,17 +6,20 @@ import com.ubcmmhcsoftware.ubcmmhc_web.DTO.LoginDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.ResetPasswordDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.Entity.User;
 import com.ubcmmhcsoftware.ubcmmhc_web.Entity.VerificationToken;
+import com.ubcmmhcsoftware.ubcmmhc_web.Exception.InvalidTokenException;
 import com.ubcmmhcsoftware.ubcmmhc_web.Exception.UserAlreadyExistsException;
 import com.ubcmmhcsoftware.ubcmmhc_web.Repository.UserRepository;
 import com.ubcmmhcsoftware.ubcmmhc_web.Repository.VerificationTokenRepository;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -75,7 +78,7 @@ public class AuthService {
     /**
      * Authenticates a user using Spring Security's AuthenticationManager.
      *
-     * @param loginDTO           Data transfer object containing the email and password.
+     * @param loginDTO Data transfer object containing the email and password.
      * @return CustomUserDetails containing the authenticated user's principal data.
      */
     public CustomUserDetails loginUser(LoginDTO loginDTO) {
@@ -92,46 +95,52 @@ public class AuthService {
      * </p>
      * inputs the new password, and calls the resetPassword endpoint.
      *
-     * @param email                         The email address of the user requesting the password reset.
+     * @param email The email address of the user requesting the password reset.
      * @throws MessagingException           If sending the email fails.
      * @throws UnsupportedEncodingException If URL encoding of the token fails.
      */
     @Transactional
     public void forgotPassword(String email) throws MessagingException, UnsupportedEncodingException {
-        Optional<User> user = userRepository.findUserByEmail(email);
-
-        if (user.isEmpty()) return;
+        User user = userRepository.findUserByEmail(email).orElse(null);
+        if (user == null) return;
 
         String token = generateVerificationToken();
 
-        VerificationToken verificationToken = new VerificationToken(token, user.get(), TOKEN_EXPIRATION_TIME);
+        Optional<VerificationToken> existingToken = verificationTokenRepository.findByUser(user);
 
-        verificationTokenRepository.deleteByUser_Id(user.get().getId());
-        verificationTokenRepository.save(verificationToken);
+        if (existingToken.isPresent()) {
+            VerificationToken vt = existingToken.get();
+            vt.setToken(token);
+            vt.updateToken(token, TOKEN_EXPIRATION_TIME);
+            verificationTokenRepository.save(vt);
+        } else {
+            VerificationToken newToken = new VerificationToken(token, user, TOKEN_EXPIRATION_TIME);
+            verificationTokenRepository.save(newToken);
+        }
 
         String link = String.format("%s/reset-password?token=%s", URLConstant.FRONTEND_URL, URLEncoder.encode(token, StandardCharsets.UTF_8));
-
-        emailService.sendPasswordResetEmail(user.get().getEmail(), "Your Password Reset Link", link);
+        emailService.sendPasswordResetEmail(user.getEmail(), "Your Password Reset Link", link);
     }
 
     /**
      * Resets the user's password if the provided token is valid and not expired.
      *
-     * @param resetPasswordDTO  Data transfer object containing the 6-digit token and new password.
+     * @param resetPasswordDTO Data transfer object containing the 6-digit token and new password.
      * @throws RuntimeException If the token is invalid or expired.
      */
     @Transactional
     public void resetPassword(ResetPasswordDTO resetPasswordDTO) {
-        VerificationToken verificationToken = verificationTokenRepository.findByToken(resetPasswordDTO.getToken()).orElseThrow(() -> new RuntimeException("Verification token invalid"));
+        VerificationToken verificationToken = verificationTokenRepository.findByToken(resetPasswordDTO.getToken())
+                .orElseThrow(() -> new InvalidTokenException("Invalid token"));
 
         if (verificationToken.getExpiryDate().isBefore(Instant.now())) {
             verificationTokenRepository.delete(verificationToken);
-            throw new RuntimeException("Token has expired");
+            throw new InvalidTokenException("Token has expired");
         }
 
         User user = verificationToken.getUser();
         user.setPassword(passwordEncoder.encode(resetPasswordDTO.getNewPassword()));
-        userRepository.save(user);
+        user.setVerificationToken(null);
 
         verificationTokenRepository.delete(verificationToken);
     }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 /**
@@ -42,6 +43,15 @@ public class VerificationToken {
     public VerificationToken(String token, User user, int expiryTimeInMinutes) {
         this.token = token;
         this.user = user;
-        this.expiryDate = Instant.now().plusSeconds(expiryTimeInMinutes * 60L);
+        this.expiryDate = calculateExpiryDate(expiryTimeInMinutes);
+    }
+
+    public void updateToken(String newToken, int expiryTimeInMinutes) {
+        this.token = newToken;
+        this.expiryDate = calculateExpiryDate(expiryTimeInMinutes);
+    }
+
+    private Instant calculateExpiryDate(int expiryTimeInMinutes) {
+        return Instant.now().plus(expiryTimeInMinutes, ChronoUnit.MINUTES);
     }
 }
