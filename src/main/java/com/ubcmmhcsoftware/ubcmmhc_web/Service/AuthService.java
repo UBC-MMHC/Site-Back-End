@@ -4,14 +4,18 @@ import com.ubcmmhcsoftware.ubcmmhc_web.Config.CustomUserDetails;
 import com.ubcmmhcsoftware.ubcmmhc_web.Config.URLConstant;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.LoginDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.ResetPasswordDTO;
+import com.ubcmmhcsoftware.ubcmmhc_web.Entity.Role;
 import com.ubcmmhcsoftware.ubcmmhc_web.Entity.User;
 import com.ubcmmhcsoftware.ubcmmhc_web.Entity.VerificationToken;
+import com.ubcmmhcsoftware.ubcmmhc_web.Enum.RoleEnum;
 import com.ubcmmhcsoftware.ubcmmhc_web.Exception.InvalidTokenException;
 import com.ubcmmhcsoftware.ubcmmhc_web.Exception.UserAlreadyExistsException;
+import com.ubcmmhcsoftware.ubcmmhc_web.Repository.RoleRepository;
 import com.ubcmmhcsoftware.ubcmmhc_web.Repository.UserRepository;
 import com.ubcmmhcsoftware.ubcmmhc_web.Repository.VerificationTokenRepository;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,8 +30,10 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * Service responsible for handling user authentication, registration,
@@ -42,6 +48,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final VerificationTokenRepository verificationTokenRepository;
     private final EmailService emailService;
+    private final RoleRepository roleRepository;
 
     /**
      * Registers a new user based on the provided login credentials.
@@ -71,6 +78,12 @@ public class AuthService {
         User user = new User();
         user.setEmail(loginDTO.getEmail());
         user.setPassword(passwordEncoder.encode(loginDTO.getPassword()));
+
+        Role role = roleRepository.findByName(RoleEnum.ROLE_USER)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
+
+        role.setName(RoleEnum.ROLE_USER);
+        user.setUser_roles(Set.of(role));
 
         userRepository.save(user);
     }
