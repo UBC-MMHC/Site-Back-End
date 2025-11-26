@@ -3,6 +3,7 @@ package com.ubcmmhcsoftware.ubcmmhc_web.Service;
 import com.ubcmmhcsoftware.ubcmmhc_web.Config.CustomUserDetails;
 import com.ubcmmhcsoftware.ubcmmhc_web.Config.URLConstant;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.LoginDTO;
+import com.ubcmmhcsoftware.ubcmmhc_web.DTO.ResetPasswordDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.Entity.User;
 import com.ubcmmhcsoftware.ubcmmhc_web.Entity.VerificationToken;
 import com.ubcmmhcsoftware.ubcmmhc_web.Exception.UserAlreadyExistsException;
@@ -25,6 +26,10 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.Random;
 
+/**
+ * Service responsible for handling user authentication, registration,
+ * and password management logic.
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -35,6 +40,16 @@ public class AuthService {
     private final VerificationTokenRepository verificationTokenRepository;
     private final EmailService emailService;
 
+    /**
+     * Registers a new user based on the provided login credentials.
+     * <p>
+     * Checks if the user already exists via email. If the user exists with a Google ID,
+     * throws an exception instructing them to use Google Login.
+     * </p>
+     *
+     * @param loginDTO Data transfer object containing the email and password.
+     * @throws UserAlreadyExistsException If a user with the given email already exists.
+     */
     public void registerUser(LoginDTO loginDTO) {
         Optional<User> useExists = userRepository.findUserByEmail(loginDTO.getEmail());
 
@@ -46,9 +61,7 @@ public class AuthService {
             }
 
             if (existingUser.getGoogleId() != null) {
-                throw new UserAlreadyExistsException(
-                        "Account exists via Google. Please login with Google to access your account."
-                );
+                throw new UserAlreadyExistsException("Account exists via Google. Please login with Google to access your account.");
             }
         }
 
@@ -59,15 +72,30 @@ public class AuthService {
         userRepository.save(user);
     }
 
+    /**
+     * Authenticates a user using Spring Security's AuthenticationManager.
+     *
+     * @param loginDTO           Data transfer object containing the email and password.
+     * @return CustomUserDetails containing the authenticated user's principal data.
+     */
     public CustomUserDetails loginUser(LoginDTO loginDTO) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword())
-        );
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword()));
 
         return (CustomUserDetails) authentication.getPrincipal();
-
     }
-    // TODO Will redirec tto frontend reset password page snd when password inputed and submit cliked call the resetPasswordCall
+
+    /**
+     * Initiates the forgot password process.
+     * <p>
+     * Generates a 6-digit verification token, saves it to the database, and sends
+     * an email with a link to the frontend reset page.
+     * </p>
+     * inputs the new password, and calls the resetPassword endpoint.
+     *
+     * @param email                         The email address of the user requesting the password reset.
+     * @throws MessagingException           If sending the email fails.
+     * @throws UnsupportedEncodingException If URL encoding of the token fails.
+     */
     @Transactional
     public void forgotPassword(String email) throws MessagingException, UnsupportedEncodingException {
         Optional<User> user = userRepository.findUserByEmail(email);
@@ -81,19 +109,20 @@ public class AuthService {
         verificationTokenRepository.deleteByUser_Id(user.get().getId());
         verificationTokenRepository.save(verificationToken);
 
-        String link = String.format("%s/reset-password?token=%s",
-                URLConstant.FRONTEND_URL,
-                URLEncoder.encode(token, StandardCharsets.UTF_8));
+        String link = String.format("%s/reset-password?token=%s", URLConstant.FRONTEND_URL, URLEncoder.encode(token, StandardCharsets.UTF_8));
 
         emailService.sendPasswordResetEmail(user.get().getEmail(), "Your Password Reset Link", link);
-
-//        System.out.println("Your Password Reset Link is: " + link);
     }
 
+    /**
+     * Resets the user's password if the provided token is valid and not expired.
+     *
+     * @param resetPasswordDTO  Data transfer object containing the 6-digit token and new password.
+     * @throws RuntimeException If the token is invalid or expired.
+     */
     @Transactional
-    public void resetPassword(String token, String newPassword) {
-        VerificationToken verificationToken = verificationTokenRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Verification token invalid"));
+    public void resetPassword(ResetPasswordDTO resetPasswordDTO) {
+        VerificationToken verificationToken = verificationTokenRepository.findByToken(resetPasswordDTO.getToken()).orElseThrow(() -> new RuntimeException("Verification token invalid"));
 
         if (verificationToken.getExpiryDate().isBefore(Instant.now())) {
             verificationTokenRepository.delete(verificationToken);
@@ -101,14 +130,17 @@ public class AuthService {
         }
 
         User user = verificationToken.getUser();
-        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setPassword(passwordEncoder.encode(resetPasswordDTO.getNewPassword()));
         userRepository.save(user);
 
         verificationTokenRepository.delete(verificationToken);
     }
 
+    /*
+     * The following methods (requestLoginCode, verifyLoginCode) are currently disabled.
+     * Un-comment if implementing Magic Link / One-Time-Password login logic.
+     */
 
-    // upon login we check if user is registered if no, register them, then we generate token and email it
 //    public void requestLoginCode(LoginDTO loginDTO) throws MessagingException, UnsupportedEncodingException {
 //        User user = userRepository.findUserByEmail(loginDTO.getEmail())
 //                .orElseGet(() -> {
@@ -159,8 +191,7 @@ public class AuthService {
 
     // Creates 6 digit code
     private String generateVerificationToken() {
-        return new DecimalFormat("000000")
-                .format(new Random().nextInt(999999));
+        return new DecimalFormat("000000").format(new Random().nextInt(999999));
     }
 
 

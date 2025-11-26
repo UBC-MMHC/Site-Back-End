@@ -22,6 +22,15 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+/**
+ * Main Security Configuration.
+ * <p>
+ * This class orchestrates the application's defense layers.
+ * It defines two distinct security chains:
+ * 1. API Chain: Stateless, JWT-based, strict access control.
+ * 2. Web Chain: Handles OAuth2 (Google) redirects and legacy browser support.
+ * </p>
+ */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -31,6 +40,13 @@ public class SecurityConfig {
     private final JWTAuthenticationFilter jwtAuthenticationFilter;
     private final MyOAuth2SuccessHandler myOAuth2SuccessHandler;
 
+    /**
+     * CHAIN 1: The API Guard (@Order 1)
+     * <p>
+     * Handles all traffic to "/api/**".
+     * Enforces Statelessness (No Cookies/Sessions) and JWT validation.
+     * </p>
+     */
     @Bean
     @Order(1)
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -48,7 +64,7 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .oauth2Login(AbstractHttpConfigurer::disable)
                 .exceptionHandling(e -> e
-                    .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 );
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -56,6 +72,12 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * CHAIN 2: The OAuth Handler (@Order 2)
+     * <p>
+     * Handles traffic that falls through the API chain (mostly Google OAuth redirects).
+     * </p>
+     */
     @Bean
     @Order(2)
     public SecurityFilterChain webSecurity(HttpSecurity http) throws Exception {
@@ -75,6 +97,12 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Global CORS Configuration.
+     * <p>
+     * explicit whitelist of who can talk to this API (The Frontend).
+     * </p>
+     */
     @Bean
     CorsConfigurationSource cors() {
         CorsConfiguration config = new CorsConfiguration();

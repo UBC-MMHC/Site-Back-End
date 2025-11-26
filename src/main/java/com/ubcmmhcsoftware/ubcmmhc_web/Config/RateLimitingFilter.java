@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 public class RateLimitingFilter implements Filter {
     // Strict Limit: 5 requests every 5 minutes
-    private static final int MAX_REQUESTS_PER_WINDOW = 5;
+    private static final int MAX_REQUESTS_PER_WINDOW = 8;
     private static final long TIME_WINDOW_MS = 300_000; // 5 minutes in milliseconds
 
     private static class RequestCounter {
@@ -29,9 +29,7 @@ public class RateLimitingFilter implements Filter {
         public long windowStartTimestamp = System.currentTimeMillis();
     }
 
-    // Thread-safe map to store counters for every IP accessing the API.
-    // WARNING: In production, this map needs a cleanup mechanism (e.g., scheduled task)
-    // to remove old IPs, otherwise it will eventually consume all RAM.
+    // Ram ISSUE if not handled or cleaned properly
     private final Map<String, RequestCounter> requestCounts = new ConcurrentHashMap<>();
 
     /**

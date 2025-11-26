@@ -10,11 +10,13 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.UUID;
 
 @SpringBootApplication
 @EnableAsync
+@EnableScheduling
 public class UbcmmhcWebApplication {
 
 	public static void main(String[] args) {
@@ -25,11 +27,11 @@ public class UbcmmhcWebApplication {
     @Bean
     CommandLineRunner initRoles(RoleRepository roleRepository) {
         return args -> {
-//            if(!roleRepository.existsByName(RoleEnum.ROLE_USER)) {
+            if(!roleRepository.existsByName((RoleEnum.ROLE_USER))) {
                 roleRepository.save(new Role(RoleEnum.ROLE_USER));
                 roleRepository.save(new Role(RoleEnum.ROLE_ADMIN));
                 roleRepository.save(new Role(RoleEnum.ROLE_SUPERADMIN));
-//            }
+            }
         };
     }
 
