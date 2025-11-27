@@ -41,6 +41,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                                 .requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/login/oauth2/code/**").permitAll()
+                                .requestMatchers("/api/newsletter/add-email").permitAll()
                                 .requestMatchers("/admin/**").hasRole("ADMIN")
 //                        .requestMatchers("/api/**").authenticated()
                                 .anyRequest().authenticated()

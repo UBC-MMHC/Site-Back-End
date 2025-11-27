@@ -18,15 +18,23 @@ import java.util.UUID;
 
 @Component
 public class JWTAuthenticationFilter extends OncePerRequestFilter {
-
     private final JWTService jwtService;
     private final UserRepository userRepository;
+
+    // List of endpoints to skip
+    private static final List<String> EXCLUDED_PATHS = List.of(
+    "/api/newsletter/add-email"
+    );
 
     public JWTAuthenticationFilter(JWTService jwtService, UserRepository userRepository) {
         this.jwtService = jwtService;
         this.userRepository = userRepository;
     }
-
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        return EXCLUDED_PATHS.stream().anyMatch(path::startsWith);
+    }
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
