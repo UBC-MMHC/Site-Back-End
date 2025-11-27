@@ -10,12 +10,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import com.ubcmmhcsoftware.ubcmmhc_web.Entity.User;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -33,8 +35,10 @@ public class NewsletterService {
         // TODO add some validation this is actually an email
         NewsletterSubscriber existingSubscriber = this.newsletterRepository.findByEmail(email);
         if (existingSubscriber != null && !existingSubscriber.isUnsubscribed()){
-            System.out.println("returning existing sub");
-            return;
+            throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Email is already subscribed"
+            );
         }
         String url = brevoBaseUrl + "/contacts";
 
@@ -50,16 +54,15 @@ public class NewsletterService {
         try {
             var restTemplate = new RestTemplate();
             restTemplate.postForEntity(url, request, String.class);
-            // check for success
+
+            NewsletterSubscriber subscriber = NewsletterSubscriber.builder()
+                    .email(email).createdAt(LocalDateTime.now()).unsubscribed(false).build();
+            this.newsletterRepository.save(subscriber);
         } catch (RestClientException ex) {
             System.err.println("Failed to subscribe a new email: " + ex.getMessage());
             throw ex;
         }
-        
-        // add email to db
-        NewsletterSubscriber subscriber = NewsletterSubscriber.builder()
-               .email(email).createdAt(LocalDateTime.now()).unsubscribed(false).build();
-        this.newsletterRepository.save(subscriber);
+
     }
     
 } 
