@@ -55,12 +55,12 @@ public class AuthController {
     public ResponseEntity<?> logout(HttpServletResponse response) {
         Cookie jwtCookie = new Cookie("JWT", null);
         jwtCookie.setHttpOnly(true);
-        jwtCookie.setSecure(false); // TODO: Change to true in Production!
+        jwtCookie.setSecure(true); // TODO: Change to true in Production!
         jwtCookie.setPath("/");
         jwtCookie.setMaxAge(0);
 
         Cookie xsrfCookie = new Cookie("XSRF-TOKEN", null);
-        xsrfCookie.setSecure(false); // TODO: Change to true in Production!
+        xsrfCookie.setSecure(true); // TODO: Change to true in Production!
         xsrfCookie.setPath("/");
         xsrfCookie.setMaxAge(0);
 
