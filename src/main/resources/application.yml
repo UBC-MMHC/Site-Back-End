@@ -2,7 +2,7 @@ spring:
   application:
     name: ubcmmhc-web
   profiles:
-    active: ${APPLICATION_PROFILE:dev}
+    active: prod
   security:
     oauth2:
       client:
@@ -20,6 +20,9 @@ spring:
 
 server:
   forward-headers-strategy: framework
+
+brevo:
+  api-key: ${BREVO_API_KEY}
 
 logging:
   level:
