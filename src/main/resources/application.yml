@@ -2,7 +2,7 @@ spring:
   application:
     name: ubcmmhc-web
   profiles:
-    active: prod
+    active: ${APPLICATION_PROFILE}
   security:
     oauth2:
       client:
@@ -17,9 +17,6 @@ spring:
                 - profile
   jwt:
     secret: ${JWT_SECRET_TOKEN}
-
-server:
-  forward-headers-strategy: framework
 
 brevo:
   api-key: ${BREVO_API_KEY}

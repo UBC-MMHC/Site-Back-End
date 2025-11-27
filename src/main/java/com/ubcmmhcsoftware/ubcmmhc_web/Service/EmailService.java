@@ -32,7 +32,7 @@ public class EmailService {
     /**
      * Constructor initializes the RestClient with the Brevo API Base URL and Key.
      */
-    public EmailService(@Value("${brevo.api.key}") String apiKey,
+    public EmailService(@Value("${brevo.api-key}") String apiKey,
                         @Value("${spring.mail.sender_email}") String senderEmail) {
         this.senderEmail = senderEmail;
         this.restClient = RestClient.builder()
