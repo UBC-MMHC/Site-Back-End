@@ -40,13 +40,10 @@ public class AuthControllerTest {
 
     @Test
     void testRegisterUser() throws Exception {
-        // Arrange
         LoginDTO loginDTO = new LoginDTO();
-        // Set fields on loginDTO if necessary, e.g., loginDTO.setEmail("test@test.com");
 
         doNothing().when(authService).registerUser(any(LoginDTO.class));
 
-        // Act & Assert
         mockMvc.perform(post("/api/auth/register-user")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginDTO)))
@@ -57,16 +54,13 @@ public class AuthControllerTest {
 
     @Test
     void testLoginUser() throws Exception {
-        // Arrange
         LoginDTO loginDTO = new LoginDTO();
-        CustomUserDetails mockUser = new CustomUserDetails(null); // Assuming constructor exists or mock it
+        CustomUserDetails mockUser = new CustomUserDetails(null);
 
         when(authService.loginUser(any(LoginDTO.class))).thenReturn(mockUser);
 
-        // We doNothing for the responsive service as it handles the raw response
         doNothing().when(authResponsiveService).handleSuccessfulAuthentication(any(HttpServletResponse.class), eq(mockUser), any());
 
-        // Act & Assert
         mockMvc.perform(post("/api/auth/login-user")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginDTO)))
@@ -78,11 +72,9 @@ public class AuthControllerTest {
 
     @Test
     void testForgotPassword() throws Exception {
-        // Arrange
         String email = "test@example.com";
         doNothing().when(authService).forgotPassword(email);
 
-        // Act & Assert
         mockMvc.perform(post("/api/auth/forgot-password")
                         .param("email", email))
                 .andExpect(status().isOk());
@@ -92,11 +84,9 @@ public class AuthControllerTest {
 
     @Test
     void testResetPassword() throws Exception {
-        // Arrange
         ResetPasswordDTO resetDto = new ResetPasswordDTO();
         doNothing().when(authService).resetPassword(any(ResetPasswordDTO.class));
 
-        // Act & Assert
         mockMvc.perform(post("/api/auth/reset-password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(resetDto)))
@@ -107,11 +97,9 @@ public class AuthControllerTest {
 
     @Test
     void testLogout() throws Exception {
-        // Act & Assert
         mockMvc.perform(post("/api/auth/logout"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Logged out successfully"))
-                // Verify the cookie clearing logic
                 .andExpect(cookie().value("JWT", (String) null))
                 .andExpect(cookie().maxAge("JWT", 0))
                 .andExpect(cookie().path("JWT", "/"));

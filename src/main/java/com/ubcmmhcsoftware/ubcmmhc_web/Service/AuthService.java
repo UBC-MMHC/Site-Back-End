@@ -13,24 +13,18 @@ import com.ubcmmhcsoftware.ubcmmhc_web.Exception.UserAlreadyExistsException;
 import com.ubcmmhcsoftware.ubcmmhc_web.Repository.RoleRepository;
 import com.ubcmmhcsoftware.ubcmmhc_web.Repository.UserRepository;
 import com.ubcmmhcsoftware.ubcmmhc_web.Repository.VerificationTokenRepository;
-import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
@@ -61,10 +55,10 @@ public class AuthService {
      * @throws UserAlreadyExistsException If a user with the given email already exists.
      */
     public void registerUser(LoginDTO loginDTO) {
-        Optional<User> useExists = userRepository.findUserByEmail(loginDTO.getEmail());
+        Optional<User> userExists = userRepository.findUserByEmail(loginDTO.getEmail());
 
-        if (useExists.isPresent()) {
-            User existingUser = useExists.get();
+        if (userExists.isPresent()) {
+            User existingUser = userExists.get();
 
             if (existingUser.getPassword() != null && !existingUser.getPassword().isEmpty()) {
                 throw new UserAlreadyExistsException("User with email already exists");
@@ -109,11 +103,9 @@ public class AuthService {
      * inputs the new password, and calls the resetPassword endpoint.
      *
      * @param email The email address of the user requesting the password reset.
-     * @throws MessagingException           If sending the email fails.
-     * @throws UnsupportedEncodingException If URL encoding of the token fails.
      */
     @Transactional
-    public void forgotPassword(String email) throws MessagingException, UnsupportedEncodingException {
+    public void forgotPassword(String email)  {
         User user = userRepository.findUserByEmail(email).orElse(null);
         if (user == null) return;
 
