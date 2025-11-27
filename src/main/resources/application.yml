@@ -24,6 +24,9 @@ server:
 brevo:
   api-key: ${BREVO_API_KEY}
 
+server:
+  forward-headers-strategy: framework
+
 logging:
   level:
     org:
