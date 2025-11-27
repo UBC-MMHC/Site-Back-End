@@ -33,7 +33,6 @@ spring:
     username: ${SMTP_EMAIL}
     password: ${SMTP_PASSWORD}
     protocol: smtp
-    tls: true
     properties:
       mail:
         smtp:
