@@ -6,6 +6,11 @@ spring:
     url: jdbc:postgresql://${RAILWAY_TCP_PROXY_DOMAIN}:${RAILWAY_TCP_PROXY_PORT}/${POSTGRES_DB}?sslmode=${SSL_MODE}
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
+    # By Default spring data opens 10 connections, increase as needed but 4 should be enough, saves memory
+    hikari:
+      maximum-pool-size: 4
+      minimum-idle: 1
+      idle-timeout: 300000
   jpa:
     hibernate:
       ddl-auto: update
@@ -14,21 +19,11 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
-
-
   mail:
-    host: smtp-relay.brevo.com
-    #If change need to change in MailConfig.java aswell
-    port: ${SMTP_PORT}
-    username: ${SMTP_EMAIL}
-    password: ${SMTP_PASSWORD}
-    protocol: smtp
-    tls: true
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
-          timeout: 5000
+    sender_email: ${SMTP_SENDER_EMAIL}
+
+  threads:
+    virtual:
+      enabled: true
+  jmx:
+    enabled: false

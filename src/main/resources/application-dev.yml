@@ -13,32 +13,6 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-#  TODO Implement email login and use smtp to send verificaton token
-#  mail:
-#    host: smtp.gmail.com
-#    port: 587
-#    username: ${SMTP_EMAIL}
-#    password: ${SMTP_PASSWORD}
-#    properties:
-#      mail:
-#        smtp:
-#          auth:
-#            starttls: true
-#            enable: true
 
   mail:
-    host: smtp-relay.brevo.com
-    #If change need to change in MailConfig.java aswell
-    port: 587
-    username: ${SMTP_EMAIL}
-    password: ${SMTP_PASSWORD}
-    protocol: smtp
-    tls: true
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
-          timeout: 5000
+    sender_email: ${SMTP_SENDER_EMAIL}
