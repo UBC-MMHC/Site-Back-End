@@ -18,6 +18,9 @@ spring:
   jwt:
     secret: ${JWT_SECRET_TOKEN}
 
+server:
+  forward-headers-strategy: framework
+
 logging:
   level:
     org:
