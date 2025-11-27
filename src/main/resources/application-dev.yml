@@ -16,7 +16,3 @@ spring:
 
   mail:
     sender_email: ${SMTP_SENDER_EMAIL}
-
-brevo:
-  api:
-    key: ${BREVO_API_KEY}

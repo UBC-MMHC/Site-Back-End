@@ -27,7 +27,3 @@ spring:
       enabled: true
   jmx:
     enabled: false
-
-brevo:
-  api:
-    key: ${BREVO_API_KEY}
