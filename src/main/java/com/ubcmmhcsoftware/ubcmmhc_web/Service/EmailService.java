@@ -1,87 +1,100 @@
 package com.ubcmmhcsoftware.ubcmmhc_web.Service;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
+import org.springframework.web.client.RestClient;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
 
+/**
+ * Service responsible for handling outgoing email communications via the Brevo API.
+ * <p>
+ * This service utilizes Spring's {@link RestClient} to dispatch HTML-formatted emails via HTTP requests.
+ * It is designed to run asynchronously to prevent blocking the main execution thread
+ * during the API network call.
+ * </p>
+ */
 @Service
-@RequiredArgsConstructor
+@Slf4j
 public class EmailService {
 
-    private final JavaMailSender mailSender;
+    private final RestClient restClient;
+    private final String senderEmail;
 
+    /**
+     * Constructor initializes the RestClient with the Brevo API Base URL and Key.
+     */
+    public EmailService(@Value("${brevo.api-key}") String apiKey,
+                        @Value("${spring.mail.sender_email}") String senderEmail) {
+        this.senderEmail = senderEmail;
+        this.restClient = RestClient.builder()
+                .baseUrl("https://api.brevo.com/v3")
+                .defaultHeader("api-key", apiKey)
+                .defaultHeader("Content-Type", "application/json")
+                .build();
+    }
+
+    /**
+     * Sends a password reset email containing a dynamic verification link.
+     * <p>
+     * The immediate response is returned to the controller while the email sends in the background.
+     * </p>
+     *
+     * @param to            The recipient's email address.
+     * @param subject       The subject line of the email.
+     * @param redirect_link The full URL (including token) that the user should click.
+     * * Note: Exceptions are caught and logged internally to prevent crashing the async thread.
+     */
     @Async
-    public void sendEmail(String to, String subject, String text) throws MessagingException, UnsupportedEncodingException {
-        MimeMessage message = mailSender.createMimeMessage();
+    public void sendPasswordResetEmail(String to, String subject, String redirect_link)  {
+        String htmlContent = loadTemplate("template/password_reset_email.html");
+        htmlContent = htmlContent.replace("{{reset_link}}", redirect_link);
 
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-        helper.setFrom("ubcmmhc@gmail.com", "MMHC Team");
-        helper.setTo(to);
-        helper.setSubject(subject);
+        Map<String, Object> emailRequest = Map.of(
+                "sender", Map.of("name", "MMHC Team", "email", senderEmail),
+                "to", List.of(Map.of("email", to)),
+                "subject", subject,
+                "htmlContent", htmlContent
+        );
 
-        String htmlContent =
-                "<!DOCTYPE html>" +
-                        "<html>" +
-                        "<head>" +
-                        "  <meta charset='UTF-8'/>" +
-                        "  <meta name='viewport' content='width=device-width, initial-scale=1.0'/>" +
-                        "  <style>" +
-                        "    .container {" +
-                        "      max-width: 480px;" +
-                        "      margin: 20px auto;" +
-                        "      padding: 20px;" +
-                        "      background: #ffffff;" +
-                        "      border-radius: 12px;" +
-                        "      font-family: Arial, sans-serif;" +
-                        "      box-shadow: 0 4px 12px rgba(0,0,0,0.08);" +
-                        "      text-align: center;" +
-                        "    }" +
-                        "    .title {" +
-                        "      font-size: 22px;" +
-                        "      font-weight: bold;" +
-                        "      color: #16345A;" +
-                        "      margin-bottom: 10px;" +
-                        "    }" +
-                        "    .text {" +
-                        "      font-size: 16px;" +
-                        "      color: #444;" +
-                        "      margin-bottom: 24px;" +
-                        "    }" +
-                        "    .button {" +
-                        "      display: inline-block;" +
-                        "      padding: 12px 22px;" +
-                        "      font-size: 16px;" +
-                        "      background-color: #16345A;" +
-                        "      color: white !important;" +
-                        "      text-decoration: none;" +
-                        "      border-radius: 6px;" +
-                        "      font-weight: bold;" +
-                        "    }" +
-                        "    .footer {" +
-                        "      margin-top: 25px;" +
-                        "      font-size: 12px;" +
-                        "      color: #888;" +
-                        "    }" +
-                        "  </style>" +
-                        "</head>" +
-                        "<body style='background:#f4f4f4; padding:20px;'>" +
-                        "  <div class='container'>" +
-                        "    <div class='title'>Login to MMHC</div>" +
-                        "    <div class='text'>Click the button below to securely log in to your account:</div>" +
-                        "    <a href='" + text + "' class='button'>Log In</a>" +
-                        "    <div class='footer'>If you didn’t request this email, you can safely ignore it.</div>" +
-                        "  </div>" +
-                        "</body>" +
-                        "</html>";
+        try {
+            restClient.post()
+                    .uri("/smtp/email")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(emailRequest)
+                    .retrieve()
+                    .toBodilessEntity();
 
-        helper.setText(htmlContent, true); // true = HTML
+            log.info("Password reset email sent successfully to {}", to);
+        } catch (Exception e) {
+            log.error("Failed to send email via Brevo API: {}", e.getMessage());
+        }
+    }
 
-        mailSender.send(message);
+    /**
+     * Helper method to load HTML template files from the classpath resources.
+     * <p>
+     * Used to keep Java logic separate from HTML styling.
+     * </p>
+     *
+     * @param path The relative path to the file in src/main/resources (e.g., "template/email.html").
+     * @return The content of the file as a String.
+     * @throws RuntimeException If the file cannot be found or read.
+     */
+    private String loadTemplate(String path) {
+        try {
+            ClassPathResource resource = new ClassPathResource(path);
+            return StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load template: " + path, e);
+        }
     }
 }

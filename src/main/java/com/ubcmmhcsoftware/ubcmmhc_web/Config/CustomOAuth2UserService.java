@@ -15,13 +15,30 @@ import org.springframework.stereotype.Service;
 
 import java.util.Set;
 
+/**
+ * Service responsible for processing OAuth2 login requests (e.g., "Login with Google").
+ * <p>
+ * This service sits between the OAuth provider and our application.
+ * Its primary job is "Just-In-Time" (JIT) provisioning:
+ * 1. Receive user data from Google.
+ * 2. Check if this user exists in our database.
+ * 3. If NO: Create a new account automatically.
+ * 4. If YES: Update their Google ID (linking the account).
+ * </p>
+ */
 @Service
 @RequiredArgsConstructor
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
 
-    // in future if we want to use/add github auth along with google or safari we can implmement here
+    /**
+     * Triggered automatically after the user approves the login on the provider's page.
+     *
+     * @param userRequest Contains the access token and client registration details (e.g., "google").
+     * @return The authenticated user details (which are then passed to the SuccessHandler).
+     * @throws OAuth2AuthenticationException If loading user data from the provider fails.
+     */
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oauthUser = new DefaultOAuth2UserService().loadUser(userRequest);
@@ -47,8 +64,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                 User newUser = new User();
                 newUser.setEmail(email);
                 newUser.setName(name);
-                Role userRole = roleRepository.findByName(RoleEnum.ROLE_USER)
-                        .orElseThrow(() -> new RuntimeException("Role not found"));
+                Role userRole = roleRepository.findByName(RoleEnum.ROLE_USER).orElseThrow(() -> new RuntimeException("Role not found"));
 
                 newUser.setUser_roles(Set.of(userRole));
                 return newUser;

@@ -5,5 +5,6 @@ public final class URLConstant {
     public static final String REDIRECT_AFTER_LOGIN = FRONTEND_URL + "/dashboard";
     public static final String UNAUTHORIZED_URL = FRONTEND_URL + "/unauthorized";
 
+    public static final String BACKEND_URL = "http://localhost:8080";
     private URLConstant() {}
 }
