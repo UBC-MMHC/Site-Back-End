@@ -1,64 +1,83 @@
 package com.ubcmmhcsoftware.ubcmmhc_web.Service;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
+import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
 
 /**
- * Service responsible for handling outgoing email communications.
+ * Service responsible for handling outgoing email communications via the Brevo API.
  * <p>
- * This service utilizes Spring's JavaMailSender to dispatch HTML-formatted emails.
+ * This service utilizes Spring's {@link RestClient} to dispatch HTML-formatted emails via HTTP requests.
  * It is designed to run asynchronously to prevent blocking the main execution thread
- * during email transmission.
+ * during the API network call.
  * </p>
  */
 @Service
-@RequiredArgsConstructor
+@Slf4j
 public class EmailService {
 
-    private final JavaMailSender mailSender;
+    private final RestClient restClient;
+    private final String senderEmail;
 
-    @Value("${spring.mail.sender_email}")
-    private String senderEmail;
+    /**
+     * Constructor initializes the RestClient with the Brevo API Base URL and Key.
+     */
+    public EmailService(@Value("${brevo.api.key}") String apiKey,
+                        @Value("${spring.mail.sender_email}") String senderEmail) {
+        this.senderEmail = senderEmail;
+        this.restClient = RestClient.builder()
+                .baseUrl("https://api.brevo.com/v3")
+                .defaultHeader("api-key", apiKey)
+                .defaultHeader("Content-Type", "application/json")
+                .build();
+    }
 
     /**
      * Sends a password reset email containing a dynamic verification link.
      * <p>
-     * This method is marked with {@code @Async}, meaning it runs on a separate thread.
-     * The immediate response is returned to the controller while the email sends in the background,
-     * ensuring a fast user experience.
+     * This method is marked with {@code @Async}.
+     * The immediate response is returned to the controller while the email sends in the background.
      * </p>
      *
      * @param to            The recipient's email address.
      * @param subject       The subject line of the email.
      * @param redirect_link The full URL (including token) that the user should click.
-     * @throws MessagingException           If the email server rejects the message or connection fails.
-     * @throws UnsupportedEncodingException If the sender name encoding is invalid.
+     * * Note: Exceptions are caught and logged internally to prevent crashing the async thread.
      */
     @Async
-    public void sendPasswordResetEmail(String to, String subject, String redirect_link) throws MessagingException, UnsupportedEncodingException {
+    public void sendPasswordResetEmail(String to, String subject, String redirect_link)  {
         String htmlContent = loadTemplate("template/password_reset_email.html");
         htmlContent = htmlContent.replace("{{reset_link}}", redirect_link);
 
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-        helper.setFrom(senderEmail, "MMHC Team");
-        helper.setTo(to);
-        helper.setSubject(subject);
-        helper.setText(htmlContent, true); // tr®// ue = HTML
+        Map<String, Object> emailRequest = Map.of(
+                "sender", Map.of("name", "MMHC Team", "email", senderEmail),
+                "to", List.of(Map.of("email", to)),
+                "subject", subject,
+                "htmlContent", htmlContent
+        );
 
-        mailSender.send(message);
+        try {
+            restClient.post()
+                    .uri("/smtp/email")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(emailRequest)
+                    .retrieve()
+                    .toBodilessEntity();
+
+            log.info("Password reset email sent successfully to {}", to);
+        } catch (Exception e) {
+            log.error("Failed to send email via Brevo API: {}", e.getMessage());
+        }
     }
 
     /**

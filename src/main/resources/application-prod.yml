@@ -15,18 +15,8 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   mail:
-    host: smtp-relay.brevo.com
-    #If change need to change in MailConfig.java aswell
-    port: ${SMTP_PORT}
-    username: ${SMTP_EMAIL}
-    password: ${SMTP_PASSWORD}
-    protocol: smtp
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
-          timeout: 5000
     sender_email: ${SMTP_SENDER_EMAIL}
+
+brevo:
+  api:
+    key: ${BREVO_API_KEY}

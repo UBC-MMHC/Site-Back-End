@@ -2,7 +2,7 @@ spring:
   application:
     name: ubcmmhc-web
   profiles:
-    active: ${APPLICATION_PROFILE}
+    active: ${APPLICATION_PROFILE:dev}
   security:
     oauth2:
       client:
