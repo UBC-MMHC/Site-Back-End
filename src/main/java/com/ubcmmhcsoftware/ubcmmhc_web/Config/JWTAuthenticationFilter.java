@@ -31,7 +31,6 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class JWTAuthenticationFilter extends OncePerRequestFilter {
-
     private final JWTService jwtService;
     private final CustomUserDetailsService customUserDetailsService;
 

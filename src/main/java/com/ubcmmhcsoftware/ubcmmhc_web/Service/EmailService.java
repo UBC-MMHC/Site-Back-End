@@ -45,7 +45,6 @@ public class EmailService {
     /**
      * Sends a password reset email containing a dynamic verification link.
      * <p>
-     * This method is marked with {@code @Async}.
      * The immediate response is returned to the controller while the email sends in the background.
      * </p>
      *
