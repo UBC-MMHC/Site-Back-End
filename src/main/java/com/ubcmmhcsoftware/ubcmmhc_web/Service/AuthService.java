@@ -1,7 +1,7 @@
 package com.ubcmmhcsoftware.ubcmmhc_web.Service;
 
+import com.ubcmmhcsoftware.ubcmmhc_web.Config.AppProperties;
 import com.ubcmmhcsoftware.ubcmmhc_web.Config.CustomUserDetails;
-import com.ubcmmhcsoftware.ubcmmhc_web.Config.URLConstant;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.LoginDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.ResetPasswordDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.Entity.Role;
@@ -43,6 +43,7 @@ public class AuthService {
     private final VerificationTokenRepository verificationTokenRepository;
     private final EmailService emailService;
     private final RoleRepository roleRepository;
+    private final AppProperties appProperties;
 
     /**
      * Registers a new user based on the provided login credentials.
@@ -123,7 +124,7 @@ public class AuthService {
             verificationTokenRepository.save(newToken);
         }
 
-        String link = String.format("%s/reset-password?token=%s", URLConstant.FRONTEND_URL, URLEncoder.encode(token, StandardCharsets.UTF_8));
+        String link = String.format("%s/reset-password?token=%s", appProperties.getFrontendUrl(), URLEncoder.encode(token, StandardCharsets.UTF_8));
         emailService.sendPasswordResetEmail(user.getEmail(), "Your Password Reset Link", link);
     }
 
