@@ -15,7 +15,7 @@
  @NoArgsConstructor
  @AllArgsConstructor
  @Builder
- @Table(name = "newslettersubscribers")
+ @Table(name = "newsletter_subscriber")
  public class NewsletterSubscriber {
      @Id
      @GeneratedValue(strategy = GenerationType.UUID)
