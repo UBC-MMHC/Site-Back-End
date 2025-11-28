@@ -19,7 +19,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "verification_tokens")
+@Table(name = "verification_token")
 public class VerificationToken {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
