@@ -29,6 +29,7 @@ import java.io.IOException;
 public class MyOAuth2SuccessHandler implements AuthenticationSuccessHandler {
     private final CustomUserDetailsService customUserDetailsService;
     private final AuthResponsiveService authResponsiveService;
+    private final AppProperties appProperties;
 
     /**
      * Invoked automatically by Spring Security when OAuth2 authentication succeeds.
@@ -46,7 +47,7 @@ public class MyOAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
         CustomUserDetails user = customUserDetailsService.loadUserByUsername(email);
 
-        authResponsiveService.handleSuccessfulAuthentication(response, user, URLConstant.REDIRECT_AFTER_LOGIN);
+        authResponsiveService.handleSuccessfulAuthentication(response, user, appProperties.getRedirectAfterLogin());
     }
 
 }

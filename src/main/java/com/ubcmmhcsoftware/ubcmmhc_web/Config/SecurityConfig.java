@@ -3,7 +3,6 @@ package com.ubcmmhcsoftware.ubcmmhc_web.Config;
 import com.ubcmmhcsoftware.ubcmmhc_web.Service.CustomUserDetailsService;
 import com.ubcmmhcsoftware.ubcmmhc_web.Service.JWTService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -40,11 +39,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JWTService jwtService;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JWTAuthenticationFilter jwtAuthenticationFilter;
-    private final CustomUserDetailsService customUserDetailsService;
     private final MyOAuth2SuccessHandler myOAuth2SuccessHandler;
+    private final AppProperties appProperties;
 
     /**
      * CHAIN 1: The API Guard (@Order 1)
@@ -124,7 +122,7 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource cors() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(URLConstant.FRONTEND_URL));
+        config.setAllowedOrigins(List.of(appProperties.getFrontendUrl()));
         config.setAllowCredentials(true);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
         config.setAllowedHeaders(List.of("*"));
