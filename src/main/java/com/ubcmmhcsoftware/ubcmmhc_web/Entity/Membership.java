@@ -12,7 +12,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "memberships")
+@Table(name = "membership")
 public class Membership {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
