@@ -21,7 +21,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "user")
+@Table(name = "mmhc_user")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class User {
     @Id
