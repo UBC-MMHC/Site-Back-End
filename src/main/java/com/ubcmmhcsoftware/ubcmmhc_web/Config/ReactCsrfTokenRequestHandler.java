@@ -16,6 +16,8 @@ final class ReactCsrfTokenRequestHandler extends CsrfTokenRequestAttributeHandle
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, Supplier<CsrfToken> csrfToken) {
         this.delegate.handle(request, response, csrfToken);
+
+        csrfToken.get();
     }
 
     @Override

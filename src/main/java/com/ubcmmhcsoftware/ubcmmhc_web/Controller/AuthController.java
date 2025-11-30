@@ -1,6 +1,7 @@
 package com.ubcmmhcsoftware.ubcmmhc_web.Controller;
 
 import com.ubcmmhcsoftware.ubcmmhc_web.Config.CustomUserDetails;
+import com.ubcmmhcsoftware.ubcmmhc_web.DTO.ForgotPasswordDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.LoginDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.ResetPasswordDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.Service.AuthResponsiveService;
@@ -11,7 +12,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 
@@ -38,8 +42,8 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestParam String email) {
-        authService.forgotPassword(email);
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordDTO foorgotPasswordDTO) {
+        authService.forgotPassword(foorgotPasswordDTO.getEmail());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
