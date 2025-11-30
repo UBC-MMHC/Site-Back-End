@@ -1,7 +1,5 @@
 package com.ubcmmhcsoftware.ubcmmhc_web.Config;
 
-import com.ubcmmhcsoftware.ubcmmhc_web.Service.CustomUserDetailsService;
-import com.ubcmmhcsoftware.ubcmmhc_web.Service.JWTService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -56,17 +54,16 @@ public class SecurityConfig {
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .securityMatcher("/api/**")
+                .cors(cors -> cors.configurationSource(cors()))
+
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(new ReactCsrfTokenRequestHandler())
                 )
-//                .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(cors()))
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers("/api/auth/**").permitAll()
-                                .requestMatchers("/login/oauth2/code/**").permitAll()
+                                .requestMatchers("/api/auth/**", "/api/csrf-token").permitAll()
                                 .requestMatchers("/api/newsletter/add-email").permitAll()
                                 .requestMatchers("/admin/**").hasRole("ADMIN")
                                 .requestMatchers("/error").permitAll()
@@ -74,6 +71,7 @@ public class SecurityConfig {
                 )
                 .formLogin(AbstractHttpConfigurer::disable)
                 .oauth2Login(AbstractHttpConfigurer::disable)
+
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 );
@@ -108,7 +106,7 @@ public class SecurityConfig {
                         .successHandler(myOAuth2SuccessHandler)
                 );
 
-        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+//        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
