@@ -22,7 +22,13 @@ brevo:
   api-key: ${BREVO_API_KEY}
 
 server:
-  forward-headers-strategy: framework
+  forward-headers-strategy: native 
+  servlet:
+    session:
+      cookie:
+        same-site: None
+        secure: true
+        http-only: true
 
 app:
   frontend-url: ${FRONTEND_URL}
