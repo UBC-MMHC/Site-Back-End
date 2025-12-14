@@ -57,8 +57,9 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(cors()))
 
                 .csrf(csrf -> csrf
-                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .csrfTokenRepository(cookieCsrfTokenRepository())
                         .csrfTokenRequestHandler(new ReactCsrfTokenRequestHandler())
+                        .ignoringRequestMatchers("/api/auth/**")
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -128,6 +129,16 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
+    }
+
+    private CookieCsrfTokenRepository cookieCsrfTokenRepository() {
+        CookieCsrfTokenRepository repository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+        repository.setCookiePath("/");
+        repository.setCookieCustomizer(cookie -> {
+            cookie.sameSite("None");
+            cookie.secure(true);
+        });
+        return repository;
     }
 
     @Bean
