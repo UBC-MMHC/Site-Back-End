@@ -17,6 +17,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -57,7 +58,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(cors()))
 
                 .csrf(csrf -> csrf
-                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .csrfTokenRepository(csrfTokenRepository())
                         .csrfTokenRequestHandler(new ReactCsrfTokenRequestHandler())
                         .ignoringRequestMatchers("/api/auth/**")
                 )
@@ -81,6 +82,8 @@ public class SecurityConfig {
 
         return http.build();
     }
+
+
 
     /**
      * CHAIN 2: The OAuth Handler (@Order 2)
@@ -107,7 +110,7 @@ public class SecurityConfig {
                         .successHandler(myOAuth2SuccessHandler)
                 );
 
-//        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -130,6 +133,20 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
+    }
+
+    private CsrfTokenRepository csrfTokenRepository() {
+        CookieCsrfTokenRepository repository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+
+        repository.setCookieCustomizer(cookieBuilder -> {
+            cookieBuilder
+                    .path("/")
+                    .secure(true)
+                    .sameSite("None")
+                    .httpOnly(false);
+        });
+
+        return repository;
     }
 
     @Bean
