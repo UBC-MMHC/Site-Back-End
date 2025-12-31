@@ -12,6 +12,7 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -113,4 +114,13 @@ public class JWTService {
     public String extractId(String token) {
         return extractClaim(token, Claims::getSubject);
     }
+
+    /**
+     * Extracts the user's roles from the "roles" claim.
+     * These are used by the JWTAuthenticationFilter to set authorities.
+     */
+    public List<String> extractRoles(String token) {
+        return extractClaim(token, claims -> claims.get("roles", List.class));
+    }
 }
+

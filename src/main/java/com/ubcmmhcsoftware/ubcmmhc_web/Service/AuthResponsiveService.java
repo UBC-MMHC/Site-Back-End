@@ -1,9 +1,10 @@
 package com.ubcmmhcsoftware.ubcmmhc_web.Service;
 
 import com.ubcmmhcsoftware.ubcmmhc_web.Config.CustomUserDetails;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -40,15 +41,15 @@ public class AuthResponsiveService {
 
         String jwtToken = jwtService.generateToken(customUserDetails);
 
-        Cookie jwtCookie = new Cookie("JWT", jwtToken);
-        jwtCookie.setPath("/");
-        jwtCookie.setHttpOnly(true);
-        int sevenDaysInSeconds = 7 * 24 * 60 * 60;
-        jwtCookie.setMaxAge(sevenDaysInSeconds);
-        jwtCookie.setSecure(true); //TODO with in prod HTTPS Req
-        jwtCookie.setAttribute("SameSite", "Lax");
+        ResponseCookie cookie = ResponseCookie.from("JWT", jwtToken)
+                .path("/")
+                .httpOnly(true)
+                .secure(true)
+                .maxAge(7 * 24 * 60 * 60)
+                .sameSite("None")
+                .build();
 
-        response.addCookie(jwtCookie);
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
 //        response.setStatus(HttpServletResponse.SC_FOUND);
         if (redirect != null && !redirect.isEmpty()) {

@@ -10,7 +10,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -55,19 +57,24 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
-        Cookie jwtCookie = new Cookie("JWT", null);
-        jwtCookie.setHttpOnly(true);
-        jwtCookie.setSecure(true); // TODO: Change to true in Production!
-        jwtCookie.setPath("/");
-        jwtCookie.setMaxAge(0);
+        ResponseCookie jwtCookie = ResponseCookie.from("JWT", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("None")
+                .build();
 
-        Cookie xsrfCookie = new Cookie("XSRF-TOKEN", null);
-        xsrfCookie.setSecure(true); // TODO: Change to true in Production!
-        xsrfCookie.setPath("/");
-        xsrfCookie.setMaxAge(0);
+        ResponseCookie xsrfCookie = ResponseCookie.from("XSRF-TOKEN", "")
+                .httpOnly(false)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("None")
+                .build();
 
-        response.addCookie(jwtCookie);
-        response.addCookie(xsrfCookie);
+        response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, xsrfCookie.toString());
 
         return ResponseEntity.ok("Logged out successfully");
     }
