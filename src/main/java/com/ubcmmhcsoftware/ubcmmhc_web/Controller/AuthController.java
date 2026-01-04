@@ -34,7 +34,8 @@ public class AuthController {
     }
 
     @PostMapping("/login-user")
-    public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO, HttpServletResponse response) throws ServletException, IOException {
+    public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO, HttpServletResponse response)
+            throws ServletException, IOException {
         CustomUserDetails user = authService.loginUser(loginDTO);
 
         authResponsiveService.handleSuccessfulAuthentication(response, user, null);
@@ -56,7 +57,7 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
-        ResponseCookie jwtCookie = ResponseCookie.from("JWT", "")
+        ResponseCookie jwtCookie = ResponseCookie.from(appProperties.getJwtCookieName(), "")
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
@@ -82,7 +83,8 @@ public class AuthController {
      * OAuth callback relay endpoint.
      * This endpoint is called after OAuth success with the JWT cookie already set.
      * It simply redirects to the frontend callback page.
-     * Because Next.js proxies /api/*, the cookie gets passed through on the frontend's domain.
+     * Because Next.js proxies /api/*, the cookie gets passed through on the
+     * frontend's domain.
      */
     @GetMapping("/oauth-callback")
     public void oauthCallback(HttpServletResponse response) throws IOException {
@@ -90,24 +92,29 @@ public class AuthController {
     }
 
     // If in future want password less login can use this
-//    @PostMapping("/login-email")
-//    public ResponseEntity<?> login(@RequestBody LoginDTO loginDto) throws MessagingException, UnsupportedEncodingException {
-//        authService.requestLoginCode(loginDto);
-//        return ResponseEntity.status(HttpStatus.OK).body("Verification token sent to email.");
-//    }
+    // @PostMapping("/login-email")
+    // public ResponseEntity<?> login(@RequestBody LoginDTO loginDto) throws
+    // MessagingException, UnsupportedEncodingException {
+    // authService.requestLoginCode(loginDto);
+    // return ResponseEntity.status(HttpStatus.OK).body("Verification token sent to
+    // email.");
+    // }
 
     // Verifies token, send JWT token to cookies and redirects to base_url
     // In future if want 2fa or email verification
-//    @GetMapping("/verify-token")
-//    public void verifyToken(@RequestParam("email") String email, @RequestParam("token") String token, HttpServletResponse response) throws IOException, ServletException, AuthenticationFailedException {
-//        CustomUserDetails user = authService.verifyLoginCode(email, token);
-//
-//        if (user == null) {
-//            ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token not found or invalid");
-//        }
-//
-//        authResponsiveService.handleSuccessfulAuthentication(response, user, URLConstant.REDIRECT_AFTER_LOGIN);
-//    }
-
+    // @GetMapping("/verify-token")
+    // public void verifyToken(@RequestParam("email") String email,
+    // @RequestParam("token") String token, HttpServletResponse response) throws
+    // IOException, ServletException, AuthenticationFailedException {
+    // CustomUserDetails user = authService.verifyLoginCode(email, token);
+    //
+    // if (user == null) {
+    // ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token not found or
+    // invalid");
+    // }
+    //
+    // authResponsiveService.handleSuccessfulAuthentication(response, user,
+    // URLConstant.REDIRECT_AFTER_LOGIN);
+    // }
 
 }

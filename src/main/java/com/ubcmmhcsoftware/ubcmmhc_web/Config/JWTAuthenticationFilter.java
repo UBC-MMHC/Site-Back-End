@@ -25,7 +25,8 @@ import java.util.UUID;
  * The "Gatekeeper" of the application.
  * <p>
  * This filter intercepts EVERY single HTTP request coming into the server.
- * It checks if the request has a valid "JWT" cookie. If it does, it tells Spring Security:
+ * It checks if the request has a valid "JWT" cookie. If it does, it tells
+ * Spring Security:
  * "This user is authenticated, here is their ID and their Roles."
  * </p>
  */
@@ -34,11 +35,11 @@ import java.util.UUID;
 public class JWTAuthenticationFilter extends OncePerRequestFilter {
     private final JWTService jwtService;
     private final CustomUserDetailsService customUserDetailsService;
+    private final AppProperties appProperties;
 
     // List of endpoints to skip
     private static final List<String> EXCLUDED_PATHS = List.of(
-            "/api/newsletter/add-email"
-    );
+            "/api/newsletter/add-email");
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -51,12 +52,13 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
      *
      * @param request     The incoming HTTP request (headers, cookies, body).
      * @param response    The outgoing HTTP response.
-     * @param filterChain The chain of other filters (CORS, CSRF, etc.) that must run after this.
+     * @param filterChain The chain of other filters (CORS, CSRF, etc.) that must
+     *                    run after this.
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
+            HttpServletResponse response,
+            FilterChain filterChain)
             throws ServletException, IOException {
 
         String token = null;
@@ -68,7 +70,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
         if (token == null && request.getCookies() != null) {
             for (Cookie c : request.getCookies()) {
-                if ("JWT".equals(c.getName())) {
+                if (appProperties.getJwtCookieName().equals(c.getName())) {
                     token = c.getValue();
                 }
             }
@@ -88,8 +90,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
-                        authorities
-                );
+                        authorities);
 
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
