@@ -86,10 +86,7 @@ public class AuthController {
      * Because Next.js proxies /api/*, the cookie gets passed through on the
      * frontend's domain.
      */
-    @GetMapping("/oauth-callback")
-    public void oauthCallback(HttpServletResponse response) throws IOException {
-        response.sendRedirect(appProperties.getFrontendUrl() + "/auth/callback");
-    }
+    // Removed oauthCallback as it was causing double-redirect issues.
 
     // If in future want password less login can use this
     // @PostMapping("/login-email")

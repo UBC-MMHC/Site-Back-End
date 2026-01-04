@@ -19,9 +19,11 @@ import java.io.IOException;
  * This class is triggered ONLY after:
  * 1. The user logs in with Google.
  * 2. Spring validates the Google token.
- * 3. {@link CustomOAuth2UserService} has saved/updated the user in the database.
+ * 3. {@link CustomOAuth2UserService} has saved/updated the user in the
+ * database.
  * <br>
- * Its job is to generate a JWT for the now-verified user and redirect them to the frontend.
+ * Its job is to generate a JWT for the now-verified user and redirect them to
+ * the frontend.
  * </p>
  */
 @Component
@@ -41,13 +43,15 @@ public class MyOAuth2SuccessHandler implements AuthenticationSuccessHandler {
      * @throws ServletException If request handling fails.
      */
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+            Authentication authentication) throws IOException, ServletException {
         OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
         String email = oauthUser.getAttribute("email");
 
         CustomUserDetails user = customUserDetailsService.loadUserByUsername(email);
 
-        authResponsiveService.handleSuccessfulAuthentication(response, user, "/api/auth/oauth-callback");
+        authResponsiveService.handleSuccessfulAuthentication(response, user,
+                appProperties.getFrontendUrl() + "/auth/callback");
     }
 
 }

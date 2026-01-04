@@ -3,6 +3,7 @@ package com.ubcmmhcsoftware.ubcmmhc_web.ControllerTest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ubcmmhcsoftware.ubcmmhc_web.Config.CustomUserDetails;
 import com.ubcmmhcsoftware.ubcmmhc_web.Controller.AuthController;
+import com.ubcmmhcsoftware.ubcmmhc_web.DTO.ForgotPasswordDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.LoginDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.ResetPasswordDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.Service.AuthResponsiveService;
@@ -45,8 +46,8 @@ public class AuthControllerTest {
         doNothing().when(authService).registerUser(any(LoginDTO.class));
 
         mockMvc.perform(post("/api/auth/register-user")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginDTO)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(loginDTO)))
                 .andExpect(status().isOk());
 
         verify(authService, times(1)).registerUser(any(LoginDTO.class));
@@ -59,27 +60,32 @@ public class AuthControllerTest {
 
         when(authService.loginUser(any(LoginDTO.class))).thenReturn(mockUser);
 
-        doNothing().when(authResponsiveService).handleSuccessfulAuthentication(any(HttpServletResponse.class), eq(mockUser), any());
+        doNothing().when(authResponsiveService).handleSuccessfulAuthentication(any(HttpServletResponse.class),
+                eq(mockUser), any());
 
         mockMvc.perform(post("/api/auth/login-user")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginDTO)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(loginDTO)))
                 .andExpect(status().isOk());
 
         verify(authService, times(1)).loginUser(any(LoginDTO.class));
-        verify(authResponsiveService, times(1)).handleSuccessfulAuthentication(any(HttpServletResponse.class), eq(mockUser), any());
+        verify(authResponsiveService, times(1)).handleSuccessfulAuthentication(any(HttpServletResponse.class),
+                eq(mockUser), any());
     }
 
     @Test
     void testForgotPassword() throws Exception {
-        String email = "test@example.com";
-        doNothing().when(authService).forgotPassword(email);
+        ForgotPasswordDTO forgotPasswordDTO = new ForgotPasswordDTO();
+        forgotPasswordDTO.setEmail("test@example.com");
+
+        doNothing().when(authService).forgotPassword("test@example.com");
 
         mockMvc.perform(post("/api/auth/forgot-password")
-                        .param("email", email))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(forgotPasswordDTO)))
                 .andExpect(status().isOk());
 
-        verify(authService, times(1)).forgotPassword(email);
+        verify(authService, times(1)).forgotPassword("test@example.com");
     }
 
     @Test
@@ -88,8 +94,8 @@ public class AuthControllerTest {
         doNothing().when(authService).resetPassword(any(ResetPasswordDTO.class));
 
         mockMvc.perform(post("/api/auth/reset-password")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(resetDto)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(resetDto)))
                 .andExpect(status().isOk());
 
         verify(authService, times(1)).resetPassword(any(ResetPasswordDTO.class));

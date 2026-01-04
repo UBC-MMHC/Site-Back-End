@@ -21,7 +21,6 @@ public class VerificationTokenRepositoryTest {
     @Autowired
     TestEntityManager testEntityManager;
 
-
     @Test
     public void findByToken_Success() {
         User user = new User();
@@ -68,6 +67,39 @@ public class VerificationTokenRepositoryTest {
                 .isNotPresent();
     }
 
+    @Test
+    public void findByUser_Success() {
+        User user = new User();
+        user.setEmail("findbyuser@gmail.com");
+        user.setName("FindByUser");
+        testEntityManager.persist(user);
+        testEntityManager.flush();
 
+        VerificationToken token = new VerificationToken();
+        token.setToken("userToken");
+        token.setUser(user);
+
+        testEntityManager.persist(token);
+        testEntityManager.flush();
+
+        Optional<VerificationToken> result = verificationTokenRepository.findByUser(user);
+
+        assertThat(result)
+                .isPresent()
+                .hasValueSatisfying(t -> assertThat(t.getToken()).isEqualTo("userToken"));
+    }
+
+    @Test
+    public void findByUser_NotFound() {
+        User user = new User();
+        user.setEmail("notoken@gmail.com");
+        user.setName("NoToken");
+        testEntityManager.persist(user);
+        testEntityManager.flush();
+
+        Optional<VerificationToken> result = verificationTokenRepository.findByUser(user);
+
+        assertThat(result).isEmpty();
+    }
 
 }
