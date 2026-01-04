@@ -1,5 +1,6 @@
 package com.ubcmmhcsoftware.ubcmmhc_web.Controller;
 
+import com.ubcmmhcsoftware.ubcmmhc_web.Config.AppProperties;
 import com.ubcmmhcsoftware.ubcmmhc_web.Config.CustomUserDetails;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.ForgotPasswordDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.LoginDTO;
@@ -14,10 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
@@ -27,6 +25,7 @@ import java.io.IOException;
 public class AuthController {
     private final AuthService authService;
     private final AuthResponsiveService authResponsiveService;
+    private final AppProperties appProperties;
 
     @PostMapping("/register-user")
     public ResponseEntity<?> registerUser(@RequestBody LoginDTO loginDTO) {
@@ -77,6 +76,17 @@ public class AuthController {
         response.addHeader(HttpHeaders.SET_COOKIE, xsrfCookie.toString());
 
         return ResponseEntity.ok("Logged out successfully");
+    }
+
+    /**
+     * OAuth callback relay endpoint.
+     * This endpoint is called after OAuth success with the JWT cookie already set.
+     * It simply redirects to the frontend callback page.
+     * Because Next.js proxies /api/*, the cookie gets passed through on the frontend's domain.
+     */
+    @GetMapping("/oauth-callback")
+    public void oauthCallback(HttpServletResponse response) throws IOException {
+        response.sendRedirect(appProperties.getFrontendUrl() + "/auth/callback");
     }
 
     // If in future want password less login can use this
