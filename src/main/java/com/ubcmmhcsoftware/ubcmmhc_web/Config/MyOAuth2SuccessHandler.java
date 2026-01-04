@@ -2,7 +2,6 @@ package com.ubcmmhcsoftware.ubcmmhc_web.Config;
 
 import com.ubcmmhcsoftware.ubcmmhc_web.Service.AuthResponsiveService;
 import com.ubcmmhcsoftware.ubcmmhc_web.Service.CustomUserDetailsService;
-import com.ubcmmhcsoftware.ubcmmhc_web.Service.JWTService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,7 +10,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 
@@ -33,7 +31,7 @@ import java.io.IOException;
 public class MyOAuth2SuccessHandler implements AuthenticationSuccessHandler {
     private final CustomUserDetailsService customUserDetailsService;
     private final AppProperties appProperties;
-    private final JWTService jwtService;
+    private final AuthResponsiveService authResponsiveService;
 
     /**
      * Invoked automatically by Spring Security when OAuth2 authentication succeeds.
@@ -51,13 +49,8 @@ public class MyOAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String email = oauthUser.getAttribute("email");
 
         CustomUserDetails user = customUserDetailsService.loadUserByUsername(email);
-        String jwtToken = jwtService.generateToken(user);
 
-        String targetUrl = UriComponentsBuilder.fromUriString(appProperties.getFrontendUrl() + "/auth/callback")
-                .queryParam("token", jwtToken)
-                .build().toUriString();
-
-        response.sendRedirect(targetUrl);
+        authResponsiveService.handleSuccessfulAuthentication(response, user, appProperties.getRedirectAfterLogin());
     }
 
 }
