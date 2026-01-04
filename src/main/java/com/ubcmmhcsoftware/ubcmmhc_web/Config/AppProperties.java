@@ -11,7 +11,7 @@ public class AppProperties {
     private String frontendUrl;
 
     public String getRedirectAfterLogin() {
-        return frontendUrl + "/dashboard";
+        return frontendUrl + "/auth/callback";
     }
 
     public String getUnauthorizedUrl() {
