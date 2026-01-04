@@ -79,15 +79,6 @@ public class AuthController {
         return ResponseEntity.ok("Logged out successfully");
     }
 
-    /**
-     * OAuth callback relay endpoint.
-     * This endpoint is called after OAuth success with the JWT cookie already set.
-     * It simply redirects to the frontend callback page.
-     * Because Next.js proxies /api/*, the cookie gets passed through on the
-     * frontend's domain.
-     */
-    // Removed oauthCallback as it was causing double-redirect issues.
-
     // If in future want password less login can use this
     // @PostMapping("/login-email")
     // public ResponseEntity<?> login(@RequestBody LoginDTO loginDto) throws
