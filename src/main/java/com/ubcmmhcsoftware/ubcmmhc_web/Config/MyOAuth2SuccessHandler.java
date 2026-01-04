@@ -1,7 +1,7 @@
 package com.ubcmmhcsoftware.ubcmmhc_web.Config;
 
-import com.ubcmmhcsoftware.ubcmmhc_web.Service.AuthResponsiveService;
 import com.ubcmmhcsoftware.ubcmmhc_web.Service.CustomUserDetailsService;
+import com.ubcmmhcsoftware.ubcmmhc_web.Service.JWTService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 
@@ -23,7 +24,8 @@ import java.io.IOException;
  * database.
  * <br>
  * Its job is to generate a JWT for the now-verified user and redirect them to
- * the frontend.
+ * the frontend with the token as a URL parameter.
+ * The frontend will then call /api/auth/set-token to set the cookie.
  * </p>
  */
 @Component
@@ -31,7 +33,7 @@ import java.io.IOException;
 public class MyOAuth2SuccessHandler implements AuthenticationSuccessHandler {
     private final CustomUserDetailsService customUserDetailsService;
     private final AppProperties appProperties;
-    private final AuthResponsiveService authResponsiveService;
+    private final JWTService jwtService;
 
     /**
      * Invoked automatically by Spring Security when OAuth2 authentication succeeds.
@@ -49,8 +51,13 @@ public class MyOAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String email = oauthUser.getAttribute("email");
 
         CustomUserDetails user = customUserDetailsService.loadUserByUsername(email);
+        String jwtToken = jwtService.generateToken(user);
 
-        authResponsiveService.handleSuccessfulAuthentication(response, user, appProperties.getRedirectAfterLogin());
+        String targetUrl = UriComponentsBuilder.fromUriString(appProperties.getRedirectAfterLogin())
+                .queryParam("token", jwtToken)
+                .build().toUriString();
+
+        response.sendRedirect(targetUrl);
     }
 
 }

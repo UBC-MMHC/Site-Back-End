@@ -79,6 +79,31 @@ public class AuthController {
         return ResponseEntity.ok("Logged out successfully");
     }
 
+    /**
+     * Sets the JWT token as an HTTP-only cookie.
+     * Used by OAuth2 flow where the token is passed via URL redirect.
+     */
+    @PostMapping("/set-token")
+    public ResponseEntity<?> setToken(@RequestBody java.util.Map<String, String> body, HttpServletResponse response) {
+        String token = body.get("token");
+
+        if (token == null || token.isEmpty()) {
+            return ResponseEntity.badRequest().body("Token is required");
+        }
+
+        ResponseCookie cookie = ResponseCookie.from(appProperties.getJwtCookieName(), token)
+                .path("/")
+                .httpOnly(true)
+                .secure(appProperties.isJwtCookieSecure())
+                .maxAge(appProperties.getJwtExpirationSeconds())
+                .sameSite(appProperties.getJwtCookieSameSite())
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        return ResponseEntity.ok().build();
+    }
+
     // If in future want password less login can use this
     // @PostMapping("/login-email")
     // public ResponseEntity<?> login(@RequestBody LoginDTO loginDto) throws
