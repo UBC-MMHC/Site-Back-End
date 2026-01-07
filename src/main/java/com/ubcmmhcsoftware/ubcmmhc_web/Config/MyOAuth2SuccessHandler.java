@@ -1,7 +1,7 @@
 package com.ubcmmhcsoftware.ubcmmhc_web.Config;
 
-import com.ubcmmhcsoftware.ubcmmhc_web.Service.AuthResponsiveService;
 import com.ubcmmhcsoftware.ubcmmhc_web.Service.CustomUserDetailsService;
+import com.ubcmmhcsoftware.ubcmmhc_web.Service.JWTService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 
@@ -19,17 +20,20 @@ import java.io.IOException;
  * This class is triggered ONLY after:
  * 1. The user logs in with Google.
  * 2. Spring validates the Google token.
- * 3. {@link CustomOAuth2UserService} has saved/updated the user in the database.
+ * 3. {@link CustomOAuth2UserService} has saved/updated the user in the
+ * database.
  * <br>
- * Its job is to generate a JWT for the now-verified user and redirect them to the frontend.
+ * Its job is to generate a JWT for the now-verified user and redirect them to
+ * the frontend with the token as a URL parameter.
+ * The frontend will then call /api/auth/set-token to set the cookie.
  * </p>
  */
 @Component
 @RequiredArgsConstructor
 public class MyOAuth2SuccessHandler implements AuthenticationSuccessHandler {
     private final CustomUserDetailsService customUserDetailsService;
-    private final AuthResponsiveService authResponsiveService;
     private final AppProperties appProperties;
+    private final JWTService jwtService;
 
     /**
      * Invoked automatically by Spring Security when OAuth2 authentication succeeds.
@@ -41,13 +45,19 @@ public class MyOAuth2SuccessHandler implements AuthenticationSuccessHandler {
      * @throws ServletException If request handling fails.
      */
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+            Authentication authentication) throws IOException, ServletException {
         OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
         String email = oauthUser.getAttribute("email");
 
         CustomUserDetails user = customUserDetailsService.loadUserByUsername(email);
+        String jwtToken = jwtService.generateToken(user);
 
-        authResponsiveService.handleSuccessfulAuthentication(response, user, appProperties.getRedirectAfterLogin());
+        String targetUrl = UriComponentsBuilder.fromUriString(appProperties.getRedirectAfterLogin())
+                .queryParam("token", jwtToken)
+                .build().toUriString();
+
+        response.sendRedirect(targetUrl);
     }
 
 }

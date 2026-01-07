@@ -22,7 +22,7 @@ brevo:
   api-key: ${BREVO_API_KEY}
 
 server:
-  forward-headers-strategy: native 
+  forward-headers-strategy: framework
   servlet:
     session:
       cookie:
@@ -32,6 +32,12 @@ server:
 
 app:
   frontend-url: ${FRONTEND_URL}
+  jwt-cookie:
+    secure: ${JWT_COOKIE_SECURE:true}
+    same-site: ${JWT_COOKIE_SAME_SITE:None}
+    name: ${JWT_COOKIE_NAME:JWT}
+  jwt:
+    expiration-seconds: ${JWT_EXPIRATION_SECONDS:604800}
 
 logging:
   level:
