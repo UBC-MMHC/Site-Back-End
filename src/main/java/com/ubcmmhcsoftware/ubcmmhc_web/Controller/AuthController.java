@@ -1,5 +1,6 @@
 package com.ubcmmhcsoftware.ubcmmhc_web.Controller;
 
+import com.ubcmmhcsoftware.ubcmmhc_web.Config.AppProperties;
 import com.ubcmmhcsoftware.ubcmmhc_web.Config.CustomUserDetails;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.ForgotPasswordDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.LoginDTO;
@@ -10,12 +11,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
@@ -25,6 +25,7 @@ import java.io.IOException;
 public class AuthController {
     private final AuthService authService;
     private final AuthResponsiveService authResponsiveService;
+    private final AppProperties appProperties;
 
     @PostMapping("/register-user")
     public ResponseEntity<?> registerUser(@RequestBody LoginDTO loginDTO) {
@@ -33,7 +34,8 @@ public class AuthController {
     }
 
     @PostMapping("/login-user")
-    public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO, HttpServletResponse response) throws ServletException, IOException {
+    public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO, HttpServletResponse response)
+            throws ServletException, IOException {
         CustomUserDetails user = authService.loginUser(loginDTO);
 
         authResponsiveService.handleSuccessfulAuthentication(response, user, null);
@@ -55,42 +57,77 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
-        Cookie jwtCookie = new Cookie("JWT", null);
-        jwtCookie.setHttpOnly(true);
-        jwtCookie.setSecure(true); // TODO: Change to true in Production!
-        jwtCookie.setPath("/");
-        jwtCookie.setMaxAge(0);
+        ResponseCookie jwtCookie = ResponseCookie.from(appProperties.getJwtCookieName(), "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("None")
+                .build();
 
-        Cookie xsrfCookie = new Cookie("XSRF-TOKEN", null);
-        xsrfCookie.setSecure(true); // TODO: Change to true in Production!
-        xsrfCookie.setPath("/");
-        xsrfCookie.setMaxAge(0);
+        ResponseCookie xsrfCookie = ResponseCookie.from("XSRF-TOKEN", "")
+                .httpOnly(false)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("None")
+                .build();
 
-        response.addCookie(jwtCookie);
-        response.addCookie(xsrfCookie);
+        response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, xsrfCookie.toString());
 
         return ResponseEntity.ok("Logged out successfully");
     }
 
+    /**
+     * Sets the JWT token as an HTTP-only cookie.
+     * Used by OAuth2 flow where the token is passed via URL redirect.
+     */
+    @PostMapping("/set-token")
+    public ResponseEntity<?> setToken(@RequestBody java.util.Map<String, String> body, HttpServletResponse response) {
+        String token = body.get("token");
+
+        if (token == null || token.isEmpty()) {
+            return ResponseEntity.badRequest().body("Token is required");
+        }
+
+        ResponseCookie cookie = ResponseCookie.from(appProperties.getJwtCookieName(), token)
+                .path("/")
+                .httpOnly(true)
+                .secure(appProperties.isJwtCookieSecure())
+                .maxAge(appProperties.getJwtExpirationSeconds())
+                .sameSite(appProperties.getJwtCookieSameSite())
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        return ResponseEntity.ok().build();
+    }
+
     // If in future want password less login can use this
-//    @PostMapping("/login-email")
-//    public ResponseEntity<?> login(@RequestBody LoginDTO loginDto) throws MessagingException, UnsupportedEncodingException {
-//        authService.requestLoginCode(loginDto);
-//        return ResponseEntity.status(HttpStatus.OK).body("Verification token sent to email.");
-//    }
+    // @PostMapping("/login-email")
+    // public ResponseEntity<?> login(@RequestBody LoginDTO loginDto) throws
+    // MessagingException, UnsupportedEncodingException {
+    // authService.requestLoginCode(loginDto);
+    // return ResponseEntity.status(HttpStatus.OK).body("Verification token sent to
+    // email.");
+    // }
 
     // Verifies token, send JWT token to cookies and redirects to base_url
     // In future if want 2fa or email verification
-//    @GetMapping("/verify-token")
-//    public void verifyToken(@RequestParam("email") String email, @RequestParam("token") String token, HttpServletResponse response) throws IOException, ServletException, AuthenticationFailedException {
-//        CustomUserDetails user = authService.verifyLoginCode(email, token);
-//
-//        if (user == null) {
-//            ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token not found or invalid");
-//        }
-//
-//        authResponsiveService.handleSuccessfulAuthentication(response, user, URLConstant.REDIRECT_AFTER_LOGIN);
-//    }
-
+    // @GetMapping("/verify-token")
+    // public void verifyToken(@RequestParam("email") String email,
+    // @RequestParam("token") String token, HttpServletResponse response) throws
+    // IOException, ServletException, AuthenticationFailedException {
+    // CustomUserDetails user = authService.verifyLoginCode(email, token);
+    //
+    // if (user == null) {
+    // ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token not found or
+    // invalid");
+    // }
+    //
+    // authResponsiveService.handleSuccessfulAuthentication(response, user,
+    // URLConstant.REDIRECT_AFTER_LOGIN);
+    // }
 
 }

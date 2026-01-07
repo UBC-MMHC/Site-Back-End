@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 public class RateLimitingFilter implements Filter {
     // Strict Limit: 5 requests every 5 minutes
-    private static final int MAX_REQUESTS_PER_WINDOW = 8;
+    private static final int MAX_REQUESTS_PER_WINDOW = 20;
     private static final long TIME_WINDOW_MS = 300_000; // 5 minutes in milliseconds
 
     private static class RequestCounter {
