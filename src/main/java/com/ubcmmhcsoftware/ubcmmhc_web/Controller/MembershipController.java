@@ -88,4 +88,34 @@ public class MembershipController {
         boolean hasActive = membershipService.hasActiveMembership(email);
         return ResponseEntity.ok(Map.of("active", hasActive));
     }
+
+    /**
+     * Gets the current authenticated user's membership status.
+     * Used by frontend to gate access to dashboard/profile.
+     *
+     * @param userDetails The authenticated user
+     * @return hasMembership (registered), isPaid (payment complete), membershipType
+     */
+    @GetMapping("/my-status")
+    public ResponseEntity<?> getMyMembershipStatus(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Optional<Membership> membership = membershipService.getMembershipByEmail(userDetails.getUsername());
+
+        if (membership.isEmpty()) {
+            return ResponseEntity.ok(Map.of(
+                    "hasMembership", false,
+                    "isPaid", false,
+                    "membershipType", (Object) null));
+        }
+
+        Membership m = membership.get();
+        return ResponseEntity.ok(Map.of(
+                "hasMembership", true,
+                "isPaid", m.isActive(),
+                "membershipType", m.getMembershipType().name(),
+                "paymentStatus", m.getPaymentStatus() != null ? m.getPaymentStatus() : "pending"));
+    }
 }
