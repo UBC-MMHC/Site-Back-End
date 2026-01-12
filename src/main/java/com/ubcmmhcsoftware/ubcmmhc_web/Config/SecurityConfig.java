@@ -38,132 +38,131 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final CustomOAuth2UserService customOAuth2UserService;
-    private final JWTAuthenticationFilter jwtAuthenticationFilter;
-    private final MyOAuth2SuccessHandler myOAuth2SuccessHandler;
-    private final AppProperties appProperties;
+        private final CustomOAuth2UserService customOAuth2UserService;
+        private final JWTAuthenticationFilter jwtAuthenticationFilter;
+        private final MyOAuth2SuccessHandler myOAuth2SuccessHandler;
+        private final AppProperties appProperties;
 
-    /**
-     * CHAIN 1: The API Guard (@Order 1)
-     * <p>
-     * Handles all traffic to "/api/**".
-     * Enforces Statelessness (No Cookies/Sessions) and JWT validation.
-     * </p>
-     */
-    @Bean
-    @Order(1)
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .securityMatcher("/api/**")
-                .cors(cors -> cors.configurationSource(cors()))
+        /**
+         * CHAIN 1: The API Guard (@Order 1)
+         * <p>
+         * Handles all traffic to "/api/**".
+         * Enforces Statelessness (No Cookies/Sessions) and JWT validation.
+         * </p>
+         */
+        @Bean
+        @Order(1)
+        SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+                http
+                                .securityMatcher("/api/**")
+                                .cors(cors -> cors.configurationSource(cors()))
 
-                .csrf(csrf -> csrf
-                        .csrfTokenRepository(csrfTokenRepository())
-                        .csrfTokenRequestHandler(new ReactCsrfTokenRequestHandler())
-                        .ignoringRequestMatchers("/api/auth/**")
-                )
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                                .requestMatchers("/api/auth/**", "/api/csrf-token").permitAll()
-                                .requestMatchers("/api/newsletter/add-email").permitAll()
-                                .requestMatchers("/admin/**").hasRole("ADMIN")
-                                .requestMatchers("/error").permitAll()
-                                .anyRequest().authenticated()
-                )
-                .formLogin(AbstractHttpConfigurer::disable)
-                .oauth2Login(AbstractHttpConfigurer::disable)
+                                .csrf(csrf -> csrf
+                                                .csrfTokenRepository(csrfTokenRepository())
+                                                .csrfTokenRequestHandler(new ReactCsrfTokenRequestHandler())
+                                                .ignoringRequestMatchers("/api/auth/**", "/api/membership/**",
+                                                                "/api/stripe/**"))
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers("/api/auth/**", "/api/csrf-token").permitAll()
+                                                .requestMatchers("/api/newsletter/add-email").permitAll()
+                                                .requestMatchers("/api/membership/register", "/api/membership/check")
+                                                .permitAll()
+                                                .requestMatchers("/api/stripe/webhook").permitAll()
+                                                .requestMatchers("/admin/**").hasRole("ADMIN")
+                                                .requestMatchers("/error").permitAll()
+                                                .anyRequest().authenticated())
+                                .formLogin(AbstractHttpConfigurer::disable)
+                                .oauth2Login(AbstractHttpConfigurer::disable)
 
-                .exceptionHandling(e -> e
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-                );
+                                .exceptionHandling(e -> e
+                                                .authenticationEntryPoint(
+                                                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)));
 
-        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+                return http.build();
+        }
 
+        /**
+         * CHAIN 2: The OAuth Handler (@Order 2)
+         * <p>
+         * Handles traffic that falls through the API chain (mostly Google OAuth
+         * redirects).
+         * </p>
+         */
+        @Bean
+        @Order(2)
+        public SecurityFilterChain webSecurity(HttpSecurity http) throws Exception {
+                http
+                                .securityMatcher("/**")
+                                .cors(cors -> cors.configurationSource(cors()))
+                                .csrf(AbstractHttpConfigurer::disable)
 
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                                .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers("/login/**", "/oauth2/**").permitAll()
+                                                .requestMatchers("/admin/**").hasRole("ADMIN")
+                                                .anyRequest().authenticated())
 
-    /**
-     * CHAIN 2: The OAuth Handler (@Order 2)
-     * <p>
-     * Handles traffic that falls through the API chain (mostly Google OAuth redirects).
-     * </p>
-     */
-    @Bean
-    @Order(2)
-    public SecurityFilterChain webSecurity(HttpSecurity http) throws Exception {
-        http
-                .securityMatcher("/**")
-                .cors(cors -> cors.configurationSource(cors()))
-                .csrf(AbstractHttpConfigurer::disable)
+                                .oauth2Login(oauth -> oauth
+                                                .userInfoEndpoint(userInfo -> userInfo
+                                                                .userService(customOAuth2UserService))
+                                                .successHandler(myOAuth2SuccessHandler))
 
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                )
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login/**", "/oauth2/**").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated()
-                )
+                                .exceptionHandling(e -> e
+                                                .authenticationEntryPoint(
+                                                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)));
 
-                .oauth2Login(oauth -> oauth
-                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
-                        .successHandler(myOAuth2SuccessHandler)
-                )
+                http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-                .exceptionHandling(e -> e
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-                );
+                return http.build();
+        }
 
-        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        /**
+         * Global CORS Configuration.
+         * <p>
+         * explicit whitelist of who can talk to this API (The Frontend).
+         * </p>
+         */
+        @Bean
+        CorsConfigurationSource cors() {
+                CorsConfiguration config = new CorsConfiguration();
+                config.setAllowedOrigins(List.of(appProperties.getFrontendUrl()));
+                config.setAllowCredentials(true);
+                config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-XSRF-TOKEN"));
+                config.setExposedHeaders(List.of("Authorization"));
 
-        return http.build();
-    }
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/**", config);
+                return source;
+        }
 
-    /**
-     * Global CORS Configuration.
-     * <p>
-     * explicit whitelist of who can talk to this API (The Frontend).
-     * </p>
-     */
-    @Bean
-    CorsConfigurationSource cors() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(appProperties.getFrontendUrl()));
-        config.setAllowCredentials(true);
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-XSRF-TOKEN"));
-        config.setExposedHeaders(List.of("Authorization"));
+        private CsrfTokenRepository csrfTokenRepository() {
+                CookieCsrfTokenRepository repository = CookieCsrfTokenRepository.withHttpOnlyFalse();
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
-    }
+                repository.setCookieCustomizer(cookieBuilder -> {
+                        cookieBuilder
+                                        .path("/")
+                                        .secure(true)
+                                        .sameSite("None")
+                                        .httpOnly(false);
+                });
 
-    private CsrfTokenRepository csrfTokenRepository() {
-        CookieCsrfTokenRepository repository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+                return repository;
+        }
 
-        repository.setCookieCustomizer(cookieBuilder -> {
-            cookieBuilder
-                    .path("/")
-                    .secure(true)
-                    .sameSite("None")
-                    .httpOnly(false);
-        });
+        @Bean
+        public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+                return config.getAuthenticationManager();
+        }
 
-        return repository;
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 
 }
