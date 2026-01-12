@@ -11,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,12 +25,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class NewsletterService {
     private final NewsletterRepository newsletterRepository;
+    private final RestTemplate restTemplate;
+
     @Value("${brevo.api-key}")
     private String brevoApiKey;
     @Value("${brevo.newsletter-list-id}")
     private Integer newsletterListId;
     @Value("${brevo.base-url}")
-    private final String brevoBaseUrl = "https://api.brevo.com/v3";
+    private String brevoBaseUrl;
+
 
     public void addEmail(String email){
         // TODO add some validation this is actually an email
@@ -44,7 +48,7 @@ public class NewsletterService {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("api-key", brevoApiKey);
+        headers.set("api-key", brevoApiKey.trim());
 
         Map<String, Object> body = new HashMap<>();
 
@@ -54,7 +58,6 @@ public class NewsletterService {
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
         try {
-            var restTemplate = new RestTemplate();
             restTemplate.postForEntity(url, request, String.class);
 
             NewsletterSubscriber subscriber = NewsletterSubscriber.builder()
