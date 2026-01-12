@@ -19,7 +19,9 @@ spring:
     secret: ${JWT_SECRET_TOKEN}
 
 brevo:
+  base-url: ${BREVO_BASE_URL}
   api-key: ${BREVO_API_KEY}
+  newsletter-list-id: ${BREVO_NEWSLETTER_LIST_ID}
 
 server:
   forward-headers-strategy: framework
