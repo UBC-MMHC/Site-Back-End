@@ -1,22 +1,24 @@
 package com.ubcmmhcsoftware.ubcmmhc_web.Service;
 
-import com.ubcmmhcsoftware.ubcmmhc_web.Entity.NewsletterSubscriber;
-import com.ubcmmhcsoftware.ubcmmhc_web.Repository.NewsletterRepository;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import com.ubcmmhcsoftware.ubcmmhc_web.Entity.NewsletterSubscriber;
+import com.ubcmmhcsoftware.ubcmmhc_web.Repository.NewsletterRepository;
 
 @ExtendWith(MockitoExtension.class)
 class NewsletterServiceTest {
@@ -31,6 +33,8 @@ class NewsletterServiceTest {
     void setUp() {
         // Set the brevoApiKey using reflection since it's @Value injected
         ReflectionTestUtils.setField(newsletterService, "brevoApiKey", "test-api-key");
+        ReflectionTestUtils.setField(newsletterService, "newsletterListId", 2);
+        ReflectionTestUtils.setField(newsletterService, "brevoBaseUrl", "https://api.brevo.com/v3");
     }
 
     @Test
