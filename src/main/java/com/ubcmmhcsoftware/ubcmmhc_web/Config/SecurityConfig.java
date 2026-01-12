@@ -60,7 +60,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(csrfTokenRepository())
                         .csrfTokenRequestHandler(new ReactCsrfTokenRequestHandler())
-                        .ignoringRequestMatchers("/api/auth/**")
+                        .ignoringRequestMatchers("/api/auth/**", "/api/newsletter/add-email")
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
