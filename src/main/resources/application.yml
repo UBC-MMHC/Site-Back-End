@@ -46,3 +46,11 @@ logging:
     org:
       springframework:
         security: INFO
+
+stripe:
+  secret-key: ${STRIPE_SECRET_KEY}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET}
+  prices:
+    ubc-student: ${STRIPE_PRICE_UBC_STUDENT}
+    non-ubc-student: ${STRIPE_PRICE_NON_UBC_STUDENT}
+    non-student: ${STRIPE_PRICE_NON_STUDENT}
