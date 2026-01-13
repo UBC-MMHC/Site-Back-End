@@ -130,4 +130,17 @@ public class AuthController {
     // URLConstant.REDIRECT_AFTER_LOGIN);
     // }
 
+    /**
+     * Returns the current authenticated user's basic info.
+     * Used by frontend to pre-fill forms.
+     */
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(
+            @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(java.util.Map.of("email", userDetails.getUsername()));
+    }
+
 }

@@ -1,0 +1,11 @@
+# Ignore all test files
+**/test/
+**/tests/
+**/*.test.js
+**/*.spec.ts
+
+# Ignore documentation and local config
+README.md
+.git
+node_modules
+.idea/
