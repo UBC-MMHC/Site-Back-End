@@ -118,4 +118,31 @@ public class MembershipController {
                 "membershipType", m.getMembershipType().name(),
                 "paymentStatus", m.getPaymentStatus() != null ? m.getPaymentStatus() : "pending"));
     }
+
+    /**
+     * Creates a new Stripe checkout session for an existing unpaid membership.
+     * Used when user returns to complete payment.
+     *
+     * @param userDetails The authenticated user
+     * @return CheckoutSessionDTO with session URL for frontend redirect
+     */
+    @PostMapping("/retry-payment")
+    public ResponseEntity<?> retryPayment(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            CheckoutSessionDTO sessionDTO = membershipService.createRetryPaymentSession(userDetails.getUsername());
+            return ResponseEntity.ok(sessionDTO);
+        } catch (IllegalStateException e) {
+            log.warn("Retry payment failed: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (StripeException e) {
+            log.error("Stripe error during retry payment: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Payment service unavailable. Please try again."));
+        }
+    }
 }

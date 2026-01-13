@@ -127,4 +127,35 @@ public class MembershipService {
                 .map(Membership::isActive)
                 .orElse(false);
     }
+
+    /**
+     * Creates a new Stripe checkout session for an existing unpaid membership.
+     *
+     * @param email The user's email
+     * @return CheckoutSessionDTO with the Stripe session URL
+     * @throws StripeException if Stripe API call fails
+     */
+    @Transactional
+    public CheckoutSessionDTO createRetryPaymentSession(String email) throws StripeException {
+        Membership membership = membershipRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalStateException("No membership found for this email"));
+
+        if (membership.isActive()) {
+            throw new IllegalStateException("Membership is already active");
+        }
+
+        // Create new Stripe checkout session
+        Session session = stripeService.createCheckoutSession(membership);
+
+        // Update Stripe session ID
+        membership.setStripeSessionId(session.getId());
+        membershipRepository.save(membership);
+
+        log.info("Created retry payment session {} for {}", session.getId(), email);
+
+        return CheckoutSessionDTO.builder()
+                .sessionId(session.getId())
+                .sessionUrl(session.getUrl())
+                .build();
+    }
 }
