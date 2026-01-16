@@ -36,7 +36,6 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     private final CustomUserDetailsService customUserDetailsService;
     private final AppProperties appProperties;
 
-    // List of endpoints to skip
     private static final List<String> EXCLUDED_PATHS = List.of(
             "/api/newsletter/add-email");
 
