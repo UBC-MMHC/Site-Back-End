@@ -144,10 +144,8 @@ public class MembershipService {
             throw new IllegalStateException("Membership is already active");
         }
 
-        // Create new Stripe checkout session
         Session session = stripeService.createCheckoutSession(membership);
 
-        // Update Stripe session ID
         membership.setStripeSessionId(session.getId());
         membershipRepository.save(membership);
 

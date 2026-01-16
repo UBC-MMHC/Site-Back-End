@@ -73,8 +73,8 @@ public class MembershipController {
         return ResponseEntity.ok(Map.of(
                 "active", m.isActive(),
                 "membershipType", m.getMembershipType().name(),
-                "endDate", m.getEndDate() != null ? m.getEndDate().toString() : null,
-                "verifiedAt", m.getVerifiedAt() != null ? m.getVerifiedAt().toString() : null));
+                "endDate", m.getEndDate() != null ? m.getEndDate().toString() : "",
+                "verifiedAt", m.getVerifiedAt() != null ? m.getVerifiedAt().toString() : ""));
     }
 
     /**
@@ -107,8 +107,7 @@ public class MembershipController {
         if (membership.isEmpty()) {
             return ResponseEntity.ok(Map.of(
                     "hasMembership", false,
-                    "isPaid", false,
-                    "membershipType", (Object) null));
+                    "isPaid", false));
         }
 
         Membership m = membership.get();

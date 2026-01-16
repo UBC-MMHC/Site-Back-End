@@ -26,7 +26,6 @@ public class RateLimitingFilter implements Filter {
     private static final int MAX_REQUESTS_PER_WINDOW = 20;
     private static final long TIME_WINDOW_MS = 300_000; // 5 minutes in milliseconds
 
-    // Paths to exclude from rate limiting (webhook endpoints)
     private static final Set<String> EXCLUDED_PATHS = Set.of(
             "/api/stripe/webhook");
 
@@ -35,7 +34,6 @@ public class RateLimitingFilter implements Filter {
         public volatile long windowStartTimestamp = System.currentTimeMillis();
     }
 
-    // Ram ISSUE if not handled or cleaned properly
     private final Map<String, RequestCounter> requestCounts = new ConcurrentHashMap<>();
 
     /**
