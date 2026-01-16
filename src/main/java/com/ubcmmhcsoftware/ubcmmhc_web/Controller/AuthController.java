@@ -7,6 +7,7 @@ import com.ubcmmhcsoftware.ubcmmhc_web.DTO.LoginDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.ResetPasswordDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.Service.AuthResponsiveService;
 import com.ubcmmhcsoftware.ubcmmhc_web.Service.AuthService;
+import com.ubcmmhcsoftware.ubcmmhc_web.Repository.NewsletterRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -26,6 +27,7 @@ public class AuthController {
     private final AuthService authService;
     private final AuthResponsiveService authResponsiveService;
     private final AppProperties appProperties;
+    private final NewsletterRepository newsletterRepository;
 
     @PostMapping("/register-user")
     public ResponseEntity<?> registerUser(@RequestBody LoginDTO loginDTO) {
@@ -140,7 +142,14 @@ public class AuthController {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return ResponseEntity.ok(java.util.Map.of("email", userDetails.getUsername()));
+
+        String email = userDetails.getUsername();
+
+        boolean isSubscribed = newsletterRepository.existsByEmail(email);
+
+        return ResponseEntity.ok(java.util.Map.of(
+                "email", email,
+                "newsletterSubscription", isSubscribed));
     }
 
 }
