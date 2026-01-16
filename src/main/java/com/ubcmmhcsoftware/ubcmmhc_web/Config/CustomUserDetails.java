@@ -12,7 +12,8 @@ import java.util.UUID;
 /**
  * The "Security Identity" of a user.
  * <p>
- * This class implements the Adapter Pattern. It wraps our custom database {@link User} entity
+ * This class implements the Adapter Pattern. It wraps our custom database
+ * {@link User} entity
  * into the standard {@link UserDetails} interface required by Spring Security.
  * <br>
  * When Spring Security asks "Who is logged in?", it looks at this object.
@@ -24,16 +25,21 @@ public class CustomUserDetails implements UserDetails {
     private final String username;
     private final String password;
     private final Collection<? extends GrantedAuthority> authorities;
+    @Getter
+    private final boolean newsletterSubscription;
 
     /**
      * Constructor: Converts a raw Database User into a Security User.
+     * 
      * @param user The entity fetched from the repository.
      */
     public CustomUserDetails(User user) {
         this.id = user.getId();
         this.username = user.getEmail();
         this.password = user.getPassword();
-        this.authorities = user.getUser_roles().stream().map(role -> new SimpleGrantedAuthority(role.getName().toString())).toList();
+        this.authorities = user.getUser_roles().stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName().toString())).toList();
+        this.newsletterSubscription = user.isNewsletterSubscription();
     }
 
     @Override

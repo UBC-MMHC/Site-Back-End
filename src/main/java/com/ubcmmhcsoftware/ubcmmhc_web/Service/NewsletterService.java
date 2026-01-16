@@ -18,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.ubcmmhcsoftware.ubcmmhc_web.Entity.NewsletterSubscriber;
 import com.ubcmmhcsoftware.ubcmmhc_web.Repository.NewsletterRepository;
+import com.ubcmmhcsoftware.ubcmmhc_web.Repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class NewsletterService {
     private final NewsletterRepository newsletterRepository;
+    private final UserRepository userRepository;
     private final RestTemplate restTemplate;
 
     @Value("${brevo.api-key}")
@@ -34,16 +36,14 @@ public class NewsletterService {
     @Value("${brevo.base-url}")
     private String brevoBaseUrl;
 
-
-    public void addEmail(String email){
-        // TODO add some validation this is actually an email
+    public void addEmail(String email) {
         NewsletterSubscriber existingSubscriber = this.newsletterRepository.findByEmail(email);
-        if (existingSubscriber != null && !existingSubscriber.isUnsubscribed()){
+        if (existingSubscriber != null && !existingSubscriber.isUnsubscribed()) {
             throw new ResponseStatusException(
-                HttpStatus.CONFLICT,
-                "Email is already subscribed"
-            );
+                    HttpStatus.CONFLICT,
+                    "Email is already subscribed");
         }
+
         String url = brevoBaseUrl + "/contacts";
 
         HttpHeaders headers = new HttpHeaders();
@@ -51,23 +51,41 @@ public class NewsletterService {
         headers.set("api-key", brevoApiKey.trim());
 
         Map<String, Object> body = new HashMap<>();
-
         body.put("email", email);
         body.put("listIds", List.of(newsletterListId));
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
+        boolean brevoSuccess = false;
         try {
             restTemplate.postForEntity(url, request, String.class);
-
-            NewsletterSubscriber subscriber = NewsletterSubscriber.builder()
-                    .email(email).createdAt(LocalDateTime.now()).unsubscribed(false).build();
-            this.newsletterRepository.save(subscriber);
+            brevoSuccess = true;
+        } catch (HttpClientErrorException ex) {
+            if (ex.getStatusCode() == HttpStatus.BAD_REQUEST &&
+                    ex.getResponseBodyAsString().contains("duplicate_parameter")) {
+                System.out.println("Email already exists in Brevo, treating as success: " + email);
+                brevoSuccess = true;
+            } else {
+                System.err.println("Brevo API error: " + ex.getMessage());
+                throw ex;
+            }
         } catch (RestClientException ex) {
-            System.err.println("Failed to subscribe a new email: " + ex.getMessage());
+            System.err.println("Failed to subscribe email: " + ex.getMessage());
             throw ex;
         }
 
+        if (brevoSuccess) {
+            if (existingSubscriber == null) {
+                NewsletterSubscriber subscriber = NewsletterSubscriber.builder()
+                        .email(email).createdAt(LocalDateTime.now()).unsubscribed(false).build();
+                this.newsletterRepository.save(subscriber);
+            }
+
+            userRepository.findUserByEmail(email).ifPresent(user -> {
+                user.setNewsletterSubscription(true);
+                userRepository.save(user);
+            });
+        }
     }
-    
-} 
+
+}
