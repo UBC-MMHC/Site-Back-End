@@ -70,6 +70,7 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/newsletter/add-email").permitAll()
                                                 .requestMatchers("/api/membership/register", "/api/membership/check")
                                                 .permitAll()
+                                                .requestMatchers("/api/stripe/webhook").permitAll()
                                                 .requestMatchers("/admin/**").hasRole("ADMIN")
                                                 .requestMatchers("/error").permitAll()
                                                 .anyRequest().authenticated())
