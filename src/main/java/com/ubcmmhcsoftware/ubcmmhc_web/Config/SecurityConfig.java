@@ -45,15 +45,6 @@ public class SecurityConfig {
         private final AppProperties appProperties;
 
         /**
-         * Completely bypass Spring Security for the webhook endpoint.
-         * This ensures no filters (including JWT) are applied.
-         */
-        @Bean
-        public WebSecurityCustomizer webSecurityCustomizer() {
-                return (web) -> web.ignoring().requestMatchers("/api/stripe/webhook");
-        }
-
-        /**
          * CHAIN 1: The API Guard (@Order 1)
          * <p>
          * Handles all traffic to "/api/**" except webhook.
