@@ -40,7 +40,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
     private static final List<String> EXCLUDED_PATHS = List.of(
             "/api/newsletter/add-email",
-            "/api/stripe/webhook",
+            "/api/stripe/",
             "/error");
 
     @Override

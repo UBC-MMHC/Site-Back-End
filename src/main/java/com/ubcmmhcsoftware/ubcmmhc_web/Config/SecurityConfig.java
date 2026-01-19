@@ -14,7 +14,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -62,7 +61,7 @@ public class SecurityConfig {
                                                 .csrfTokenRepository(csrfTokenRepository())
                                                 .csrfTokenRequestHandler(new ReactCsrfTokenRequestHandler())
                                                 .ignoringRequestMatchers("/api/auth/**", "/api/membership/**",
-                                                                "/api/stripe/**", "/api/stripe/webhook",
+                                                                "/api/stripe/**",
                                                                 "/api/newsletter/add-email"))
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -71,7 +70,7 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/newsletter/add-email").permitAll()
                                                 .requestMatchers("/api/membership/register", "/api/membership/check")
                                                 .permitAll()
-                                                .requestMatchers("/api/stripe/webhook").permitAll()
+                                                .requestMatchers("/api/stripe/**").permitAll()
                                                 .requestMatchers("/admin/**").hasRole("ADMIN")
                                                 .requestMatchers("/error").permitAll()
                                                 .anyRequest().authenticated())
@@ -137,7 +136,7 @@ public class SecurityConfig {
                 webhookConfig.setAllowedOrigins(List.of("*"));
                 webhookConfig.setAllowedMethods(List.of("POST", "OPTIONS"));
                 webhookConfig.setAllowedHeaders(List.of("Content-Type", "Stripe-Signature"));
-                source.registerCorsConfiguration("/api/stripe/webhook", webhookConfig);
+                source.registerCorsConfiguration("/api/stripe/**", webhookConfig);
 
                 CorsConfiguration config = new CorsConfiguration();
                 config.setAllowedOrigins(List.of(appProperties.getFrontendUrl()));
