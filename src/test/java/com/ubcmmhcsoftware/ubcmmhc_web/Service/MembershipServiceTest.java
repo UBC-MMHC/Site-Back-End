@@ -138,7 +138,6 @@ class MembershipServiceTest {
     void activateMembership_shouldSetActiveAndVerifiedAt() {
         String sessionId = "cs_test_123";
         String customerId = "cus_123";
-        String subscriptionId = "sub_123";
 
         Membership pendingMembership = Membership.builder()
                 .id(UUID.randomUUID())
@@ -150,7 +149,7 @@ class MembershipServiceTest {
 
         when(membershipRepository.findByStripeSessionId(sessionId)).thenReturn(Optional.of(pendingMembership));
 
-        membershipService.activateMembership(sessionId, customerId, subscriptionId);
+        membershipService.activateMembership(sessionId, customerId);
 
         ArgumentCaptor<Membership> captor = ArgumentCaptor.forClass(Membership.class);
         verify(membershipRepository).save(captor.capture());
@@ -159,7 +158,6 @@ class MembershipServiceTest {
         assertTrue(activated.isActive());
         assertEquals("completed", activated.getPaymentStatus());
         assertEquals(customerId, activated.getStripeCustomerId());
-        assertEquals(subscriptionId, activated.getStripeSubscriptionId());
         assertNotNull(activated.getVerifiedAt());
         assertNotNull(activated.getEndDate());
     }
@@ -168,7 +166,7 @@ class MembershipServiceTest {
     void activateMembership_withNoMembershipFound_shouldNotThrow() {
         when(membershipRepository.findByStripeSessionId(any())).thenReturn(Optional.empty());
 
-        assertDoesNotThrow(() -> membershipService.activateMembership("unknown", "cus", "sub"));
+        assertDoesNotThrow(() -> membershipService.activateMembership("unknown", "cus"));
         verify(membershipRepository, never()).save(any());
     }
 

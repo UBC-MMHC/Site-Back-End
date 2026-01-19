@@ -45,14 +45,12 @@ public class StripeWebhookController {
 
         log.info("Received Stripe event: {} ({})", event.getType(), event.getId());
 
-        // Handle the checkout.session.completed event
         if ("checkout.session.completed".equals(event.getType())) {
             Session session = stripeService.extractSessionFromEvent(event);
             if (session != null) {
                 membershipService.activateMembership(
                         session.getId(),
-                        session.getCustomer(),
-                        session.getSubscription());
+                        session.getCustomer());
             }
         }
 

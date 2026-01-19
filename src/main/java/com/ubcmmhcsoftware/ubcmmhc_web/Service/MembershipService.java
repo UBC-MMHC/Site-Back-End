@@ -35,12 +35,10 @@ public class MembershipService {
      */
     @Transactional
     public CheckoutSessionDTO createMembership(MembershipRegistrationDTO dto) throws StripeException {
-        // Check if email already has a membership
         if (membershipRepository.existsByEmail(dto.getEmail())) {
             throw new IllegalStateException("A membership already exists for this email");
         }
 
-        // Create pending membership
         Membership membership = Membership.builder()
                 .fullName(dto.getFullName())
                 .email(dto.getEmail())
@@ -56,7 +54,6 @@ public class MembershipService {
         membership = membershipRepository.save(membership);
         log.info("Created pending membership {} for {}", membership.getId(), dto.getEmail());
 
-        // Handle newsletter subscription if opted in
         if (dto.isNewsletterOptIn()) {
             try {
                 newsletterService.addEmail(dto.getEmail());
@@ -65,10 +62,8 @@ public class MembershipService {
             }
         }
 
-        // Create Stripe checkout session
         Session session = stripeService.createCheckoutSession(membership);
 
-        // Save Stripe session ID
         membership.setStripeSessionId(session.getId());
         membershipRepository.save(membership);
 
@@ -80,11 +75,13 @@ public class MembershipService {
 
     /**
      * Activates a membership after successful payment.
+     * Uses idempotency check to prevent duplicate webhook processing.
      *
-     * @param sessionId The Stripe session ID from the webhook
+     * @param sessionId  The Stripe session ID from the webhook
+     * @param customerId The Stripe customer ID
      */
     @Transactional
-    public void activateMembership(String sessionId, String customerId, String subscriptionId) {
+    public void activateMembership(String sessionId, String customerId) {
         Optional<Membership> optionalMembership = membershipRepository.findByStripeSessionId(sessionId);
 
         if (optionalMembership.isEmpty()) {
@@ -93,10 +90,15 @@ public class MembershipService {
         }
 
         Membership membership = optionalMembership.get();
+
+        if ("completed".equals(membership.getPaymentStatus())) {
+            log.info("Membership {} already activated, skipping duplicate webhook", membership.getId());
+            return;
+        }
+
         LocalDateTime now = LocalDateTime.now();
 
         membership.setStripeCustomerId(customerId);
-        membership.setStripeSubscriptionId(subscriptionId);
         membership.setPaymentStatus("completed");
         membership.setActive(true);
         membership.setVerifiedAt(now);
