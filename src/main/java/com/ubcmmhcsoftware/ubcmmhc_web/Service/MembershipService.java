@@ -5,7 +5,12 @@ import com.stripe.model.checkout.Session;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.CheckoutSessionDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.MembershipRegistrationDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.Entity.Membership;
+import com.ubcmmhcsoftware.ubcmmhc_web.Entity.Role;
+import com.ubcmmhcsoftware.ubcmmhc_web.Entity.User;
+import com.ubcmmhcsoftware.ubcmmhc_web.Enum.RoleEnum;
 import com.ubcmmhcsoftware.ubcmmhc_web.Repository.MembershipRepository;
+import com.ubcmmhcsoftware.ubcmmhc_web.Repository.RoleRepository;
+import com.ubcmmhcsoftware.ubcmmhc_web.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,6 +30,8 @@ public class MembershipService {
     private final MembershipRepository membershipRepository;
     private final StripeService stripeService;
     private final NewsletterService newsletterService;
+    private final RoleRepository roleRepository;
+    private final UserRepository userRepository;
 
     /**
      * Creates a new membership registration and initiates Stripe checkout.
@@ -106,6 +113,18 @@ public class MembershipService {
 
         membershipRepository.save(membership);
         log.info("Activated membership {} for {}", membership.getId(), membership.getEmail());
+
+        Optional<User> optionalUser = userRepository.findUserByEmail(membership.getEmail());
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            Role memberRole = roleRepository.findByName(RoleEnum.ROLE_MEMBER)
+                    .orElseGet(() -> roleRepository.save(new Role(RoleEnum.ROLE_MEMBER)));
+            user.getUser_roles().add(memberRole);
+            userRepository.save(user);
+            log.info("Assigned ROLE_MEMBER to user {}", user.getEmail());
+        } else {
+            log.warn("No user account found for email {} to assign ROLE_MEMBER", membership.getEmail());
+        }
     }
 
     /**
