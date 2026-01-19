@@ -46,7 +46,9 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
-        return EXCLUDED_PATHS.stream().anyMatch(path::startsWith);
+        boolean excluded = EXCLUDED_PATHS.stream().anyMatch(path::startsWith);
+        log.info("Incoming request path: {} | Excluded: {}", path, excluded);
+        return excluded;
     }
 
     /**
