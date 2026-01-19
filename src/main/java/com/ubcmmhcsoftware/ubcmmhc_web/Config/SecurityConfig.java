@@ -14,6 +14,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -44,24 +45,12 @@ public class SecurityConfig {
         private final AppProperties appProperties;
 
         /**
-         * CHAIN 0: Stripe Webhook (No Security)
-         * <p>
-         * This endpoint is called by Stripe servers directly.
-         * Stripe authenticates itself via signature verification in the controller.
-         * We bypass ALL Spring Security for this endpoint.
-         * </p>
+         * Completely bypass Spring Security for the webhook endpoint.
+         * This ensures no filters (including JWT) are applied.
          */
         @Bean
-        @Order(0)
-        SecurityFilterChain webhookFilterChain(HttpSecurity http) throws Exception {
-                http
-                                .securityMatcher("/api/stripe/webhook")
-                                .csrf(AbstractHttpConfigurer::disable)
-                                .sessionManagement(session -> session
-                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                                .authorizeHttpRequests(auth -> auth
-                                                .anyRequest().permitAll());
-                return http.build();
+        public WebSecurityCustomizer webSecurityCustomizer() {
+                return (web) -> web.ignoring().requestMatchers("/api/stripe/webhook");
         }
 
         /**
