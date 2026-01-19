@@ -5,10 +5,7 @@ import com.stripe.model.checkout.Session;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.CheckoutSessionDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.MembershipRegistrationDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.Entity.Membership;
-import com.ubcmmhcsoftware.ubcmmhc_web.Entity.Role;
-import com.ubcmmhcsoftware.ubcmmhc_web.Entity.User;
 import com.ubcmmhcsoftware.ubcmmhc_web.Enum.MembershipType;
-import com.ubcmmhcsoftware.ubcmmhc_web.Enum.RoleEnum;
 import com.ubcmmhcsoftware.ubcmmhc_web.Repository.MembershipRepository;
 import com.ubcmmhcsoftware.ubcmmhc_web.Repository.RoleRepository;
 import com.ubcmmhcsoftware.ubcmmhc_web.Repository.UserRepository;
@@ -20,7 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.UUID;
 

@@ -1,7 +1,5 @@
 package com.ubcmmhcsoftware.ubcmmhc_web.Service;
 
-import com.stripe.exception.StripeException;
-import com.stripe.model.checkout.Session;
 import com.ubcmmhcsoftware.ubcmmhc_web.Config.AppProperties;
 import com.ubcmmhcsoftware.ubcmmhc_web.Config.StripeProperties;
 import com.ubcmmhcsoftware.ubcmmhc_web.Entity.Membership;
@@ -55,8 +53,6 @@ class StripeServiceTest {
         when(stripeProperties.getPrices()).thenReturn(prices);
         when(prices.getUbcStudent()).thenReturn("price_ubc_student_123");
 
-        // Verify price mapping is correct (internal method, accessed via reflection or
-        // integration test)
         assertNotNull(stripeProperties.getPrices().getUbcStudent());
         assertEquals("price_ubc_student_123", prices.getUbcStudent());
     }

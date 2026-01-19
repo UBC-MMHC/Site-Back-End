@@ -129,15 +129,22 @@ public class SecurityConfig {
          */
         @Bean
         CorsConfigurationSource cors() {
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+
+                CorsConfiguration webhookConfig = new CorsConfiguration();
+                webhookConfig.setAllowedOrigins(List.of("*"));
+                webhookConfig.setAllowedMethods(List.of("POST"));
+                webhookConfig.setAllowedHeaders(List.of("*"));
+                source.registerCorsConfiguration("/api/stripe/webhook", webhookConfig);
+
                 CorsConfiguration config = new CorsConfiguration();
                 config.setAllowedOrigins(List.of(appProperties.getFrontendUrl()));
                 config.setAllowCredentials(true);
                 config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                 config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-XSRF-TOKEN"));
                 config.setExposedHeaders(List.of("Authorization"));
-
-                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
                 source.registerCorsConfiguration("/**", config);
+
                 return source;
         }
 
