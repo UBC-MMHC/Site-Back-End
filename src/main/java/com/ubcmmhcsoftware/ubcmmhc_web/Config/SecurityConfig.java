@@ -62,7 +62,8 @@ public class SecurityConfig {
                                                 .csrfTokenRepository(csrfTokenRepository())
                                                 .csrfTokenRequestHandler(new ReactCsrfTokenRequestHandler())
                                                 .ignoringRequestMatchers("/api/auth/**", "/api/membership/**",
-                                                                "/api/stripe/**", "/api/newsletter/add-email"))
+                                                                "/api/stripe/**", "/api/stripe/webhook",
+                                                                "/api/newsletter/add-email"))
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
