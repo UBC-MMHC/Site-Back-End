@@ -44,9 +44,30 @@ public class SecurityConfig {
         private final AppProperties appProperties;
 
         /**
+         * CHAIN 0: Stripe Webhook (No Security)
+         * <p>
+         * This endpoint is called by Stripe servers directly.
+         * Stripe authenticates itself via signature verification in the controller.
+         * We bypass ALL Spring Security for this endpoint.
+         * </p>
+         */
+        @Bean
+        @Order(0)
+        SecurityFilterChain webhookFilterChain(HttpSecurity http) throws Exception {
+                http
+                                .securityMatcher("/api/stripe/webhook")
+                                .csrf(AbstractHttpConfigurer::disable)
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .authorizeHttpRequests(auth -> auth
+                                                .anyRequest().permitAll());
+                return http.build();
+        }
+
+        /**
          * CHAIN 1: The API Guard (@Order 1)
          * <p>
-         * Handles all traffic to "/api/**".
+         * Handles all traffic to "/api/**" except webhook.
          * Enforces Statelessness (No Cookies/Sessions) and JWT validation.
          * </p>
          */
@@ -69,7 +90,6 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/newsletter/add-email").permitAll()
                                                 .requestMatchers("/api/membership/register", "/api/membership/check")
                                                 .permitAll()
-                                                .requestMatchers("/api/stripe/webhook").permitAll()
                                                 .requestMatchers("/admin/**").hasRole("ADMIN")
                                                 .requestMatchers("/error").permitAll()
                                                 .anyRequest().authenticated())
@@ -133,8 +153,8 @@ public class SecurityConfig {
 
                 CorsConfiguration webhookConfig = new CorsConfiguration();
                 webhookConfig.setAllowedOrigins(List.of("*"));
-                webhookConfig.setAllowedMethods(List.of("POST"));
-                webhookConfig.setAllowedHeaders(List.of("*"));
+                webhookConfig.setAllowedMethods(List.of("POST", "OPTIONS"));
+                webhookConfig.setAllowedHeaders(List.of("Content-Type", "Stripe-Signature"));
                 source.registerCorsConfiguration("/api/stripe/webhook", webhookConfig);
 
                 CorsConfiguration config = new CorsConfiguration();
