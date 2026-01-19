@@ -24,7 +24,7 @@ brevo:
   newsletter-list-id: ${BREVO_NEWSLETTER_LIST_ID}
 
 server:
-  forward-headers-strategy: framework
+  forward-headers-strategy: native
   servlet:
     session:
       cookie:
