@@ -36,6 +36,5 @@ public interface UserRepository extends JpaRepository<User, UUID> {
      * @param email The email of the user.
      * @return The User entity with roles populated, or empty if not found.
      */
-    @Query("SELECT DISTINCT u FROM User u LEFT JOIN FETCH u.user_roles WHERE LOWER(u.email) = LOWER(:email)")
     Optional<User> findUserByEmail(String email);
 }
