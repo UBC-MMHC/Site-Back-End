@@ -47,6 +47,7 @@ public class StripeWebhookController {
             byte[] rawBody = request.getInputStream().readAllBytes();
             payload = new String(rawBody, StandardCharsets.UTF_8);
             log.info("[WEBHOOK] Received payload of {} bytes", rawBody.length);
+            log.info("[WEBHOOK] First 200 chars: {}", payload.substring(0, Math.min(200, payload.length())));
         } catch (IOException e) {
             log.error("Failed to read webhook payload: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to read payload");
