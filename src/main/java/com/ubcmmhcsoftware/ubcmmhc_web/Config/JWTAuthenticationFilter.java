@@ -40,14 +40,15 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
     private static final List<String> EXCLUDED_PATHS = List.of(
             "/api/newsletter/add-email",
-            "/api/stripe/webhook",
+            "/api/stripe/",
             "/error");
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
-        boolean excluded = EXCLUDED_PATHS.stream().anyMatch(path::startsWith);
-        log.info("JWT Filter - Path: {}, Excluded: {}, Method: {}", path, excluded, request.getMethod());
+        boolean excluded = EXCLUDED_PATHS.stream()
+                .anyMatch(excludedPath -> path.equals(excludedPath) || path.startsWith(excludedPath));
+        log.info("JWT Filter - Path: '{}', Excluded: {}, Method: {}", path, excluded, request.getMethod());
         return excluded;
     }
 

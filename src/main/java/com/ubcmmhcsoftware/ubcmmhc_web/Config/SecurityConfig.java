@@ -105,6 +105,7 @@ public class SecurityConfig {
                                                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers("/login/**", "/oauth2/**").permitAll()
+                                                .requestMatchers("/api/stripe/**").permitAll()
                                                 .requestMatchers("/admin/**").hasRole("ADMIN")
                                                 .anyRequest().authenticated())
 
