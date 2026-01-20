@@ -102,6 +102,20 @@ public class StripeService {
     }
 
     /**
+     * Retrieves an event directly from Stripe's API.
+     * Use this as an alternative to signature verification when the hosting
+     * platform
+     * modifies the request payload (like Railway's proxy).
+     *
+     * @param eventId The Stripe event ID (starts with "evt_")
+     * @return The Event from Stripe's API
+     * @throws StripeException if the event doesn't exist or API call fails
+     */
+    public Event retrieveEvent(String eventId) throws StripeException {
+        return Event.retrieve(eventId);
+    }
+
+    /**
      * Gets the Stripe Price ID for a given membership type.
      */
     private String getPriceIdForMembershipType(MembershipType membershipType) {
