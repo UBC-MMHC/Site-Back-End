@@ -7,10 +7,10 @@ spring:
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
     # By Default spring data opens 10 connections, increase as needed but 4 should be enough, saves memory
-    hikari:
-      maximum-pool-size: 4
-      minimum-idle: 1
-      idle-timeout: 300000
+    # hikari:
+    #   maximum-pool-size: 4
+    #   minimum-idle: 1
+    #   idle-timeout: 300000
   jpa:
     hibernate:
       ddl-auto: update
