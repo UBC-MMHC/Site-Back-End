@@ -45,12 +45,16 @@ public class StripeWebhookController {
 
         log.info("Received Stripe event: {} ({})", event.getType(), event.getId());
 
-        // Handle the checkout.session.completed event
         if ("checkout.session.completed".equals(event.getType())) {
             Session session = stripeService.extractSessionFromEvent(event);
             if (session != null) {
+                String membershipId = session.getMetadata().get("membership_id");
+                if (membershipId == null) {
+                    log.error("No membership_id found in session metadata for session {}", session.getId());
+                    return ResponseEntity.ok("Received - no membership_id in metadata");
+                }
                 membershipService.activateMembership(
-                        session.getId(),
+                        membershipId,
                         session.getCustomer(),
                         session.getSubscription());
             }
