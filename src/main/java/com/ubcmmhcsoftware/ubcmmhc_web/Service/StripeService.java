@@ -31,6 +31,12 @@ public class StripeService {
     @PostConstruct
     public void init() {
         Stripe.apiKey = stripeProperties.getSecretKey();
+        String webhookSecret = stripeProperties.getWebhookSecret();
+        if (webhookSecret != null && webhookSecret.length() > 10) {
+            log.info("Webhook secret loaded (first 10 chars): {}", webhookSecret.substring(0, 10));
+        } else {
+            log.warn("Webhook secret is null or too short!");
+        }
     }
 
     /**
