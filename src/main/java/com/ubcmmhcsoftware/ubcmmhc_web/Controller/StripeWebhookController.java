@@ -49,6 +49,10 @@ public class StripeWebhookController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to read payload");
         }
 
+        log.info("Webhook received - Payload length: {}, Signature (first 50): {}",
+                payload.length(),
+                signature.length() > 50 ? signature.substring(0, 50) : signature);
+
         Event event;
         try {
             event = stripeService.verifyWebhookSignature(payload, signature);
