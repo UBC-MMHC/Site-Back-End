@@ -16,7 +16,8 @@ import org.springframework.stereotype.Service;
 import java.util.Set;
 
 /**
- * Service responsible for processing OAuth2 login requests (e.g., "Login with Google").
+ * Service responsible for processing OAuth2 login requests (e.g., "Login with
+ * Google").
  * <p>
  * This service sits between the OAuth provider and our application.
  * Its primary job is "Just-In-Time" (JIT) provisioning:
@@ -33,11 +34,15 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     private final RoleRepository roleRepository;
 
     /**
-     * Triggered automatically after the user approves the login on the provider's page.
+     * Triggered automatically after the user approves the login on the provider's
+     * page.
      *
-     * @param userRequest Contains the access token and client registration details (e.g., "google").
-     * @return The authenticated user details (which are then passed to the SuccessHandler).
-     * @throws OAuth2AuthenticationException If loading user data from the provider fails.
+     * @param userRequest Contains the access token and client registration details
+     *                    (e.g., "google").
+     * @return The authenticated user details (which are then passed to the
+     *         SuccessHandler).
+     * @throws OAuth2AuthenticationException If loading user data from the provider
+     *                                       fails.
      */
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -62,9 +67,10 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         if (email != null) {
             User user = userRepository.findUserByEmail(email).orElseGet(() -> {
                 User newUser = new User();
-                newUser.setEmail(email);
+                newUser.setEmail(email.toLowerCase());
                 newUser.setName(name);
-                Role userRole = roleRepository.findByName(RoleEnum.ROLE_USER).orElseThrow(() -> new RuntimeException("Role not found"));
+                Role userRole = roleRepository.findByName(RoleEnum.ROLE_USER)
+                        .orElseThrow(() -> new RuntimeException("Role not found"));
 
                 newUser.setUser_roles(Set.of(userRole));
                 return newUser;
