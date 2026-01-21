@@ -9,7 +9,6 @@ import com.ubcmmhcsoftware.ubcmmhc_web.Service.AuthResponsiveService;
 import com.ubcmmhcsoftware.ubcmmhc_web.Service.AuthService;
 import com.ubcmmhcsoftware.ubcmmhc_web.Repository.NewsletterRepository;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
