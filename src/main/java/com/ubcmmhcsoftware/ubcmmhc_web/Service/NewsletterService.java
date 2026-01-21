@@ -18,9 +18,11 @@ import com.ubcmmhcsoftware.ubcmmhc_web.Repository.NewsletterRepository;
 import com.ubcmmhcsoftware.ubcmmhc_web.Repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NewsletterService {
     private final NewsletterRepository newsletterRepository;
     private final UserRepository userRepository;
@@ -34,22 +36,20 @@ public class NewsletterService {
     private String brevoBaseUrl;
 
     public void addEmail(String email) {
-        // Check if already subscribed locally - if so, just return success (no error)
         NewsletterSubscriber existingSubscriber = this.newsletterRepository.findByEmail(email);
         if (existingSubscriber != null && !existingSubscriber.isUnsubscribed()) {
-            // Already subscribed - treat as success, just update User entity if needed
             userRepository.findUserByEmail(email).ifPresent(user -> {
                 if (!user.isNewsletterSubscription()) {
                     user.setNewsletterSubscription(true);
                     userRepository.save(user);
                 }
             });
-            return; // Success - already subscribed
+            return;
         }
 
-        // Try to add to Brevo (silently skip if it fails)
         try {
             String url = brevoBaseUrl + "/contacts";
+            log.info("Calling Brevo API to add email: {} to list: {}", email, newsletterListId);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -60,20 +60,18 @@ public class NewsletterService {
             body.put("listIds", List.of(newsletterListId));
 
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
-            restTemplate.postForEntity(url, request, String.class);
+            var response = restTemplate.postForEntity(url, request, String.class);
+            log.info("Brevo API response for {}: status={}", email, response.getStatusCode());
         } catch (RestClientException ex) {
-            // Log but don't fail - still save to local DB
-            System.err.println("Brevo API call failed (continuing anyway): " + ex.getMessage());
+            log.error("Brevo API call failed for email {}: {}", email, ex.getMessage(), ex);
         }
 
-        // Save to local database
         if (existingSubscriber == null) {
             NewsletterSubscriber subscriber = NewsletterSubscriber.builder()
                     .email(email).createdAt(LocalDateTime.now()).unsubscribed(false).build();
             this.newsletterRepository.save(subscriber);
         }
 
-        // Update User entity if they have an account
         userRepository.findUserByEmail(email).ifPresent(user -> {
             user.setNewsletterSubscription(true);
             userRepository.save(user);
