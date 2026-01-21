@@ -1,6 +1,11 @@
 package com.ubcmmhcsoftware.ubcmmhc_web.Service;
 
 import com.stripe.Stripe;
+import com.stripe.exception.ApiConnectionException;
+import com.stripe.exception.AuthenticationException;
+import com.stripe.exception.CardException;
+import com.stripe.exception.InvalidRequestException;
+import com.stripe.exception.RateLimitException;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
@@ -59,9 +64,29 @@ public class StripeService {
                 .putMetadata("membership_type", membership.getMembershipType().name())
                 .build();
 
-        Session session = Session.create(params);
-        log.info("Created Stripe checkout session {} for membership {}", session.getId(), membership.getId());
-        return session;
+        try {
+            Session session = Session.create(params);
+            log.info("Created Stripe checkout session {} for membership {}", session.getId(), membership.getId());
+            return session;
+        } catch (CardException e) {
+            log.error("Card error: {} - {}", e.getCode(), e.getMessage());
+            throw e;
+        } catch (RateLimitException e) {
+            log.warn("Rate limited by Stripe, requestId={}", e.getRequestId());
+            throw e;
+        } catch (InvalidRequestException e) {
+            log.error("Invalid request to Stripe: {} (param: {})", e.getMessage(), e.getParam());
+            throw e;
+        } catch (AuthenticationException e) {
+            log.error("Stripe authentication failed - check API keys!");
+            throw e;
+        } catch (ApiConnectionException e) {
+            log.error("Network error connecting to Stripe: {}", e.getMessage());
+            throw e;
+        } catch (StripeException e) {
+            log.error("Generic Stripe error: {}", e.getMessage());
+            throw e;
+        }
     }
 
     /**

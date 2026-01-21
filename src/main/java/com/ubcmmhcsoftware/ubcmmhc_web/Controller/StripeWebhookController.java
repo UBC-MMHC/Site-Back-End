@@ -46,7 +46,6 @@ public class StripeWebhookController {
     @PostMapping("/webhook")
     public ResponseEntity<String> handleWebhook(HttpServletRequest request) {
 
-        // Read payload
         String payload;
         try {
             byte[] rawBody = request.getInputStream().readAllBytes();
@@ -57,7 +56,6 @@ public class StripeWebhookController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to read payload");
         }
 
-        // Parse event ID from payload
         String eventId;
         String eventType;
         try {
@@ -75,7 +73,6 @@ public class StripeWebhookController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid payload");
         }
 
-        // Retrieve event directly from Stripe API (this verifies authenticity)
         Event event;
         try {
             event = stripeService.retrieveEvent(eventId);
@@ -85,7 +82,6 @@ public class StripeWebhookController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Event not found in Stripe");
         }
 
-        // Handle checkout.session.completed
         if ("checkout.session.completed".equals(event.getType())) {
             Session session = stripeService.extractSessionFromEvent(event);
             if (session != null) {
