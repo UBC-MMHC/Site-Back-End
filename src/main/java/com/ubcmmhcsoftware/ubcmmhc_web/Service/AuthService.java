@@ -48,12 +48,14 @@ public class AuthService {
     /**
      * Registers a new user based on the provided login credentials.
      * <p>
-     * Checks if the user already exists via email. If the user exists with a Google ID,
+     * Checks if the user already exists via email. If the user exists with a Google
+     * ID,
      * throws an exception instructing them to use Google Login.
      * </p>
      *
      * @param loginDTO Data transfer object containing the email and password.
-     * @throws UserAlreadyExistsException If a user with the given email already exists.
+     * @throws UserAlreadyExistsException If a user with the given email already
+     *                                    exists.
      */
     public void registerUser(LoginDTO loginDTO) {
         Optional<User> userExists = userRepository.findUserByEmail(loginDTO.getEmail());
@@ -66,12 +68,13 @@ public class AuthService {
             }
 
             if (existingUser.getGoogleId() != null) {
-                throw new UserAlreadyExistsException("Account exists via Google. Please login with Google to access your account.");
+                throw new UserAlreadyExistsException(
+                        "Account exists via Google. Please login with Google to access your account.");
             }
         }
 
         User user = new User();
-        user.setEmail(loginDTO.getEmail());
+        user.setEmail(loginDTO.getEmail().toLowerCase());
         user.setPassword(passwordEncoder.encode(loginDTO.getPassword()));
 
         Role role = roleRepository.findByName(RoleEnum.ROLE_USER)
@@ -90,7 +93,8 @@ public class AuthService {
      * @return CustomUserDetails containing the authenticated user's principal data.
      */
     public CustomUserDetails loginUser(LoginDTO loginDTO) {
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword()));
+        Authentication authentication = authenticationManager
+                .authenticate(new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword()));
 
         return (CustomUserDetails) authentication.getPrincipal();
     }
@@ -106,9 +110,10 @@ public class AuthService {
      * @param email The email address of the user requesting the password reset.
      */
     @Transactional
-    public void forgotPassword(String email)  {
+    public void forgotPassword(String email) {
         User user = userRepository.findUserByEmail(email).orElse(null);
-        if (user == null) return;
+        if (user == null)
+            return;
 
         String token = generateVerificationToken();
 
@@ -124,14 +129,16 @@ public class AuthService {
             verificationTokenRepository.save(newToken);
         }
 
-        String link = String.format("%s/reset-password?token=%s", appProperties.getFrontendUrl(), URLEncoder.encode(token, StandardCharsets.UTF_8));
+        String link = String.format("%s/reset-password?token=%s", appProperties.getFrontendUrl(),
+                URLEncoder.encode(token, StandardCharsets.UTF_8));
         emailService.sendPasswordResetEmail(user.getEmail(), "Your Password Reset Link", link);
     }
 
     /**
      * Resets the user's password if the provided token is valid and not expired.
      *
-     * @param resetPasswordDTO Data transfer object containing the 6-digit token and new password.
+     * @param resetPasswordDTO Data transfer object containing the 6-digit token and
+     *                         new password.
      * @throws RuntimeException If the token is invalid or expired.
      */
     @Transactional
@@ -152,62 +159,66 @@ public class AuthService {
     }
 
     /*
-     * The following methods (requestLoginCode, verifyLoginCode) are currently disabled.
+     * The following methods (requestLoginCode, verifyLoginCode) are currently
+     * disabled.
      * Un-comment if implementing Magic Link / One-Time-Password login logic.
      */
 
-//    public void requestLoginCode(LoginDTO loginDTO) throws MessagingException, UnsupportedEncodingException {
-//        User user = userRepository.findUserByEmail(loginDTO.getEmail())
-//                .orElseGet(() -> {
-//                    User newUser = new User();
-//                    newUser.setEmail(loginDTO.getEmail());
-//                    return userRepository.save(newUser);
-//                });
-//
-//        String token = generateVerificationToken();
-//
-//        VerificationToken verificationToken = new VerificationToken(token, user, TOKEN_EXPIRATION_TIME);
-//        verificationTokenRepository.save(verificationToken);
-//
-//        String verificationUrl = URLConstant.BACKEND_URL + "/api/auth/verify-token";
-//        String link = String.format("%s?email=%s&token=%s",
-//                verificationUrl,
-//                URLEncoder.encode(user.getEmail(), StandardCharsets.UTF_8),
-//                URLEncoder.encode(token, StandardCharsets.UTF_8));
-//
+    // public void requestLoginCode(LoginDTO loginDTO) throws MessagingException,
+    // UnsupportedEncodingException {
+    // User user = userRepository.findUserByEmail(loginDTO.getEmail())
+    // .orElseGet(() -> {
+    // User newUser = new User();
+    // newUser.setEmail(loginDTO.getEmail());
+    // return userRepository.save(newUser);
+    // });
+    //
+    // String token = generateVerificationToken();
+    //
+    // VerificationToken verificationToken = new VerificationToken(token, user,
+    // TOKEN_EXPIRATION_TIME);
+    // verificationTokenRepository.save(verificationToken);
+    //
+    // String verificationUrl = URLConstant.BACKEND_URL + "/api/auth/verify-token";
+    // String link = String.format("%s?email=%s&token=%s",
+    // verificationUrl,
+    // URLEncoder.encode(user.getEmail(), StandardCharsets.UTF_8),
+    // URLEncoder.encode(token, StandardCharsets.UTF_8));
+    //
 
-    /// /        String email = "Click this link to login: \n \n" + link;
-//
-//        emailService.sendEmail(loginDTO.getEmail(), "Your Login Code", link );
-//    }
+    /// / String email = "Click this link to login: \n \n" + link;
+    //
+    // emailService.sendEmail(loginDTO.getEmail(), "Your Login Code", link );
+    // }
 
-
-//    // Verifies verification code
-//    @Transactional
-//    public CustomUserDetails verifyLoginCode(String email, String received_token) throws AuthenticationFailedException {
-//        Optional<VerificationToken> token = verificationTokenRepository.findByToken(received_token);
-//
-//        if (token.isEmpty()) {
-//            throw new InvalidOneTimeTokenException("Invalid token");
-//        }
-//
-//        if (Instant.now().isAfter(token.get().getExpiryDate())) {
-//            verificationTokenRepository.deleteById(token.get().getId());
-//            throw new InvalidOneTimeTokenException("Token is expired");
-//        }
-//
-//        if (!token.get().getUser().getEmail().equals(email))
-//            throw new AuthenticationFailedException("Email not valid");
-//
-//        CustomUserDetails user = customUserDetailsService.loadUserByUsername(token.get().getUser().getEmail());
-//        verificationTokenRepository.deleteByUser_Email(email);
-//        return user;
-//    }
+    // // Verifies verification code
+    // @Transactional
+    // public CustomUserDetails verifyLoginCode(String email, String received_token)
+    // throws AuthenticationFailedException {
+    // Optional<VerificationToken> token =
+    // verificationTokenRepository.findByToken(received_token);
+    //
+    // if (token.isEmpty()) {
+    // throw new InvalidOneTimeTokenException("Invalid token");
+    // }
+    //
+    // if (Instant.now().isAfter(token.get().getExpiryDate())) {
+    // verificationTokenRepository.deleteById(token.get().getId());
+    // throw new InvalidOneTimeTokenException("Token is expired");
+    // }
+    //
+    // if (!token.get().getUser().getEmail().equals(email))
+    // throw new AuthenticationFailedException("Email not valid");
+    //
+    // CustomUserDetails user =
+    // customUserDetailsService.loadUserByUsername(token.get().getUser().getEmail());
+    // verificationTokenRepository.deleteByUser_Email(email);
+    // return user;
+    // }
 
     // Creates 6 digit code
     private String generateVerificationToken() {
         return new DecimalFormat("000000").format(new Random().nextInt(999999));
     }
-
 
 }
