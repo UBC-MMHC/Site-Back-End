@@ -1,6 +1,7 @@
 package com.ubcmmhcsoftware.ubcmmhc_web.DTO;
 
 import com.ubcmmhcsoftware.ubcmmhc_web.Enum.MembershipType;
+import com.ubcmmhcsoftware.ubcmmhc_web.Enum.PaymentMethod;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -35,4 +36,7 @@ public class MembershipRegistrationDTO {
     private boolean instagramGroupchat;
 
     private boolean newsletterOptIn;
+
+    @Builder.Default
+    private PaymentMethod paymentMethod = PaymentMethod.STRIPE;
 }
