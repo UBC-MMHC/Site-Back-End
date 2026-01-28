@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Service for membership registration business logic.
@@ -95,14 +96,22 @@ public class MembershipService {
     /**
      * Activates a membership after successful payment.
      *
-     * @param sessionId The Stripe session ID from the webhook
+     * @param membershipId The membership UUID from the Stripe session metadata
      */
     @Transactional
-    public void activateMembership(String sessionId, String customerId, String subscriptionId) {
-        Optional<Membership> optionalMembership = membershipRepository.findByStripeSessionId(sessionId);
+    public void activateMembership(String membershipId, String customerId, String subscriptionId) {
+        UUID uuid;
+        try {
+            uuid = UUID.fromString(membershipId);
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid membership ID format: {}", membershipId);
+            return;
+        }
+
+        Optional<Membership> optionalMembership = membershipRepository.findById(uuid);
 
         if (optionalMembership.isEmpty()) {
-            log.error("No membership found for session ID: {}", sessionId);
+            log.error("No membership found for ID: {}", membershipId);
             return;
         }
 

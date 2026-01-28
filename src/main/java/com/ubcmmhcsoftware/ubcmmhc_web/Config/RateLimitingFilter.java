@@ -22,8 +22,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Component
 public class RateLimitingFilter implements Filter {
-    // Strict Limit: 20 requests every 5 minutes
-    private static final int MAX_REQUESTS_PER_WINDOW = 20;
+    // Conservative Limit: 100 requests every 5 minutes
+    private static final int MAX_REQUESTS_PER_WINDOW = 100;
     private static final long TIME_WINDOW_MS = 300_000; // 5 minutes in milliseconds
 
     private static final Set<String> EXCLUDED_PATHS = Set.of(
@@ -53,7 +53,7 @@ public class RateLimitingFilter implements Filter {
             return;
         }
 
-        String clientIp = httpRequest.getRemoteAddr();
+        String clientIp = getClientIp(httpRequest);
         RequestCounter counter = requestCounts.computeIfAbsent(clientIp, k -> new RequestCounter());
 
         long currentTime = System.currentTimeMillis();
@@ -98,5 +98,21 @@ public class RateLimitingFilter implements Filter {
 
             return (now - lastActive) > TIME_WINDOW_MS;
         });
+    }
+
+    /**
+     * Extracts the real client IP address from the request.
+     * Handles proxied requests (e.g., Railway, Cloudflare) by checking
+     * X-Forwarded-For header.
+     *
+     * @param request The HTTP request
+     * @return The client's real IP address
+     */
+    private String getClientIp(HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
+            return xForwardedFor.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
     }
 }

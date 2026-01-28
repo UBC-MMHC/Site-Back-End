@@ -137,21 +137,20 @@ class MembershipServiceTest {
 
     @Test
     void activateMembership_shouldSetActiveAndVerifiedAt() {
-        String sessionId = "cs_test_123";
+        UUID membershipId = UUID.randomUUID();
         String customerId = "cus_123";
         String subscriptionId = "sub_123";
 
         Membership pendingMembership = Membership.builder()
-                .id(UUID.randomUUID())
+                .id(membershipId)
                 .email("test@example.com")
-                .stripeSessionId(sessionId)
                 .paymentStatus("pending")
                 .active(false)
                 .build();
 
-        when(membershipRepository.findByStripeSessionId(sessionId)).thenReturn(Optional.of(pendingMembership));
+        when(membershipRepository.findById(membershipId)).thenReturn(Optional.of(pendingMembership));
 
-        membershipService.activateMembership(sessionId, customerId, subscriptionId);
+        membershipService.activateMembership(membershipId.toString(), customerId, subscriptionId);
 
         ArgumentCaptor<Membership> captor = ArgumentCaptor.forClass(Membership.class);
         verify(membershipRepository).save(captor.capture());
@@ -167,9 +166,10 @@ class MembershipServiceTest {
 
     @Test
     void activateMembership_withNoMembershipFound_shouldNotThrow() {
-        when(membershipRepository.findByStripeSessionId(any())).thenReturn(Optional.empty());
+        UUID unknownId = UUID.randomUUID();
+        when(membershipRepository.findById(unknownId)).thenReturn(Optional.empty());
 
-        assertDoesNotThrow(() -> membershipService.activateMembership("unknown", "cus", "sub"));
+        assertDoesNotThrow(() -> membershipService.activateMembership(unknownId.toString(), "cus", "sub"));
         verify(membershipRepository, never()).save(any());
     }
 
