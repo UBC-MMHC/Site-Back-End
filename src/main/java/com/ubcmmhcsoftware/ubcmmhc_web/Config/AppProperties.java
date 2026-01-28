@@ -22,6 +22,9 @@ public class AppProperties {
     @Value("${app.jwt.expiration-seconds:604800}")
     private long jwtExpirationSeconds;
 
+    @Value("${app.default-admin-email:}")
+    private String defaultAdminEmail;
+
     public String getRedirectAfterLogin() {
         return frontendUrl + "/auth/callback";
     }
