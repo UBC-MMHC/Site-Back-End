@@ -40,9 +40,7 @@ public class User {
     private String name;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "user_role",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> user_roles = new HashSet<>();
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
@@ -50,7 +48,6 @@ public class User {
 
     private boolean newsletterSubscription = false; // False by default
 
-    // TODO Future membership implementation
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Membership membership;
 
