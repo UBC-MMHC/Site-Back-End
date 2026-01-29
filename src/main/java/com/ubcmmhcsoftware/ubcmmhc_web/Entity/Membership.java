@@ -1,6 +1,7 @@
 package com.ubcmmhcsoftware.ubcmmhc_web.Entity;
 
 import com.ubcmmhcsoftware.ubcmmhc_web.Enum.MembershipType;
+import com.ubcmmhcsoftware.ubcmmhc_web.Enum.PaymentMethod;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -53,6 +54,11 @@ public class Membership {
     private String stripeSessionId;
 
     private String paymentStatus;
+
+    @Enumerated(EnumType.STRING)
+    private PaymentMethod paymentMethod;
+
+    private String approvedBy; // Admin email who manually approved (null if Stripe)
 
     // Membership dates
     private LocalDateTime verifiedAt;

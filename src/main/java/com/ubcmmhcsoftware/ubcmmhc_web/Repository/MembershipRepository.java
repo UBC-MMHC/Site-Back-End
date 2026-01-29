@@ -4,6 +4,7 @@ import com.ubcmmhcsoftware.ubcmmhc_web.Entity.Membership;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,4 +23,6 @@ public interface MembershipRepository extends JpaRepository<Membership, UUID> {
     Optional<Membership> findByStripeSessionId(String sessionId);
 
     boolean existsByEmail(String email);
+
+    List<Membership> findByActiveAndPaymentStatus(boolean active, String paymentStatus);
 }

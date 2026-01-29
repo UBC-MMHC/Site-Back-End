@@ -6,6 +6,7 @@ import com.ubcmmhcsoftware.ubcmmhc_web.DTO.CheckoutSessionDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.DTO.MembershipRegistrationDTO;
 import com.ubcmmhcsoftware.ubcmmhc_web.Entity.Membership;
 import com.ubcmmhcsoftware.ubcmmhc_web.Enum.MembershipType;
+import com.ubcmmhcsoftware.ubcmmhc_web.Enum.PaymentMethod;
 import com.ubcmmhcsoftware.ubcmmhc_web.Repository.MembershipRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -203,5 +204,93 @@ class MembershipServiceTest {
         when(membershipRepository.findByEmail("nonexistent@example.com")).thenReturn(Optional.empty());
 
         assertFalse(membershipService.hasActiveMembership("nonexistent@example.com"));
+    }
+
+    // Tests for manuallyApproveMembership
+
+    @Test
+    void manuallyApproveMembership_shouldActivateMembership() {
+        String memberEmail = "member@example.com";
+        String adminEmail = "admin@example.com";
+        PaymentMethod paymentMethod = PaymentMethod.CASH;
+
+        Membership pendingMembership = Membership.builder()
+                .id(UUID.randomUUID())
+                .email(memberEmail)
+                .fullName("Test Member")
+                .membershipType(MembershipType.UBC_STUDENT)
+                .paymentStatus("pending")
+                .active(false)
+                .build();
+
+        when(membershipRepository.findByEmail(memberEmail)).thenReturn(Optional.of(pendingMembership));
+
+        membershipService.manuallyApproveMembership(memberEmail, paymentMethod, adminEmail);
+
+        ArgumentCaptor<Membership> captor = ArgumentCaptor.forClass(Membership.class);
+        verify(membershipRepository).save(captor.capture());
+
+        Membership approved = captor.getValue();
+        assertTrue(approved.isActive());
+        assertEquals("completed", approved.getPaymentStatus());
+        assertEquals(PaymentMethod.CASH, approved.getPaymentMethod());
+        assertEquals(adminEmail, approved.getApprovedBy());
+        assertNotNull(approved.getVerifiedAt());
+        assertNotNull(approved.getEndDate());
+    }
+
+    @Test
+    void manuallyApproveMembership_withNoMembershipFound_shouldThrowException() {
+        when(membershipRepository.findByEmail("unknown@example.com")).thenReturn(Optional.empty());
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+                () -> membershipService.manuallyApproveMembership("unknown@example.com", PaymentMethod.CASH,
+                        "admin@example.com"));
+
+        assertTrue(exception.getMessage().contains("No membership found"));
+        verify(membershipRepository, never()).save(any());
+    }
+
+    @Test
+    void manuallyApproveMembership_alreadyActive_shouldThrowException() {
+        Membership activeMembership = Membership.builder()
+                .id(UUID.randomUUID())
+                .email("active@example.com")
+                .active(true)
+                .build();
+
+        when(membershipRepository.findByEmail("active@example.com")).thenReturn(Optional.of(activeMembership));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class,
+                () -> membershipService.manuallyApproveMembership("active@example.com", PaymentMethod.ETRANSFER,
+                        "admin@example.com"));
+
+        assertEquals("Membership is already active", exception.getMessage());
+        verify(membershipRepository, never()).save(any());
+    }
+
+    @Test
+    void getPendingMemberships_shouldReturnPendingList() {
+        Membership pending1 = Membership.builder()
+                .id(UUID.randomUUID())
+                .email("pending1@example.com")
+                .active(false)
+                .paymentStatus("pending")
+                .build();
+
+        Membership pending2 = Membership.builder()
+                .id(UUID.randomUUID())
+                .email("pending2@example.com")
+                .active(false)
+                .paymentStatus("pending")
+                .build();
+
+        when(membershipRepository.findByActiveAndPaymentStatus(false, "pending"))
+                .thenReturn(List.of(pending1, pending2));
+
+        List<Membership> result = membershipService.getPendingMemberships();
+
+        assertEquals(2, result.size());
+        verify(membershipRepository).findByActiveAndPaymentStatus(false, "pending");
     }
 }

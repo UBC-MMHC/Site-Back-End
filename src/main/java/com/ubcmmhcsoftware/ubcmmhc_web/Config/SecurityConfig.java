@@ -61,7 +61,8 @@ public class SecurityConfig {
                                                 .csrfTokenRepository(csrfTokenRepository())
                                                 .csrfTokenRequestHandler(new ReactCsrfTokenRequestHandler())
                                                 .ignoringRequestMatchers("/api/auth/**", "/api/membership/**",
-                                                                "/api/stripe/**", "/api/newsletter/add-email"))
+                                                                "/api/stripe/**", "/api/newsletter/add-email",
+                                                                "/api/admin/**"))
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
@@ -70,6 +71,7 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/membership/register", "/api/membership/check")
                                                 .permitAll()
                                                 .requestMatchers("/api/stripe/webhook").permitAll()
+                                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                                 .requestMatchers("/admin/**").hasRole("ADMIN")
                                                 .requestMatchers("/error").permitAll()
                                                 .anyRequest().authenticated())
