@@ -20,7 +20,6 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -83,7 +82,7 @@ class JWTAuthenticationFilterTest {
         when(appProperties.getJwtCookieName()).thenReturn("JWT");
         when(jwtService.extractId(validToken)).thenReturn(testUserId.toString());
         when(jwtService.isTokenValid(validToken, testUserId.toString())).thenReturn(true);
-        when(jwtService.extractRoles(validToken)).thenReturn(List.of("ROLE_USER"));
+
         when(customUserDetailsService.loadUserById(testUserId)).thenReturn(testUserDetails);
 
         jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
@@ -101,7 +100,7 @@ class JWTAuthenticationFilterTest {
         when(request.getHeader("Authorization")).thenReturn("Bearer " + validToken);
         when(jwtService.extractId(validToken)).thenReturn(testUserId.toString());
         when(jwtService.isTokenValid(validToken, testUserId.toString())).thenReturn(true);
-        when(jwtService.extractRoles(validToken)).thenReturn(List.of("ROLE_USER"));
+
         when(customUserDetailsService.loadUserById(testUserId)).thenReturn(testUserDetails);
 
         jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
@@ -173,12 +172,11 @@ class JWTAuthenticationFilterTest {
         when(request.getHeader("Authorization")).thenReturn("Bearer " + bearerToken);
         when(jwtService.extractId(bearerToken)).thenReturn(testUserId.toString());
         when(jwtService.isTokenValid(bearerToken, testUserId.toString())).thenReturn(true);
-        when(jwtService.extractRoles(bearerToken)).thenReturn(List.of("ROLE_USER"));
+
         when(customUserDetailsService.loadUserById(testUserId)).thenReturn(testUserDetails);
 
         jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
-        // Should use Bearer token, not cookie token
         verify(jwtService).extractId(bearerToken);
         verify(jwtService, never()).extractId(cookieToken);
     }
