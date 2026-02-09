@@ -34,6 +34,20 @@ public class AdminController {
     private final RoleRepository roleRepository;
 
     /**
+     * Gets the highest role level for the current admin from the database.
+     * This prevents privilege escalation by ensuring admins can only manage roles
+     * at or below their level.
+     */
+    private int getAdminRoleLevel(String adminEmail) {
+        return userRepository.findUserByEmail(adminEmail)
+                .map(admin -> admin.getUser_roles().stream()
+                        .mapToInt(role -> role.getName().getLevel())
+                        .max()
+                        .orElse(0))
+                .orElse(0);
+    }
+
+    /**
      * Gets all pending (unpaid) memberships for admin review.
      *
      * @return List of pending memberships
@@ -147,6 +161,15 @@ public class AdminController {
             return ResponseEntity.ok(Map.of("message", "User already has this role"));
         }
 
+        // Hierarchy check: admin can only assign roles at or below their level
+        int adminLevel = getAdminRoleLevel(adminDetails.getUsername());
+        if (roleEnum.getLevel() > adminLevel) {
+            log.warn("Admin {} (level {}) attempted to assign higher role {} (level {}) to {}",
+                    adminDetails.getUsername(), adminLevel, roleEnum, roleEnum.getLevel(), userEmail);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "Cannot assign a role higher than your own"));
+        }
+
         user.getUser_roles().add(role);
         userRepository.save(user);
         log.info("Admin {} assigned role {} to user {}", adminDetails.getUsername(), roleEnum, userEmail);
@@ -192,6 +215,15 @@ public class AdminController {
         if (role == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Role not found"));
+        }
+
+        // Hierarchy check: admin can only remove roles at or below their level
+        int adminLevel = getAdminRoleLevel(adminDetails.getUsername());
+        if (roleEnum.getLevel() > adminLevel) {
+            log.warn("Admin {} (level {}) attempted to remove higher role {} (level {}) from {}",
+                    adminDetails.getUsername(), adminLevel, roleEnum, roleEnum.getLevel(), userEmail);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "Cannot remove a role higher than your own"));
         }
 
         user.getUser_roles().remove(role);
