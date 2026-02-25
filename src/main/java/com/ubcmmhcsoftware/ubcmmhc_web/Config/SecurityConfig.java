@@ -104,6 +104,8 @@ public class SecurityConfig {
 
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                                .requestCache(cache -> cache
+                                                .requestCache(new org.springframework.security.web.savedrequest.NullRequestCache()))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers("/login/**", "/oauth2/**").permitAll()
                                                 .requestMatchers("/admin/**").hasRole("ADMIN")
