@@ -29,6 +29,8 @@ public class UbcmmhcWebApplication {
         return args -> {
             if (!roleRepository.existsByName((RoleEnum.ROLE_USER))) {
                 roleRepository.save(new Role(RoleEnum.ROLE_USER));
+                roleRepository.save(new Role(RoleEnum.ROLE_BLOG_EDITOR));
+                roleRepository.save(new Role(RoleEnum.ROLE_BLOG_MANAGER));
                 roleRepository.save(new Role(RoleEnum.ROLE_ADMIN));
                 roleRepository.save(new Role(RoleEnum.ROLE_SUPERADMIN));
                 log.info("Initialized roles in database");

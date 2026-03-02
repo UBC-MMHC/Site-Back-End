@@ -16,8 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -48,6 +46,7 @@ public class SecurityConfig {
          * <p>
          * Handles all traffic to "/api/**".
          * Enforces Statelessness (No Cookies/Sessions) and JWT validation.
+         * CSRF is disabled — this chain is stateless and JWT-authenticated.
          * </p>
          */
         @Bean
@@ -56,21 +55,17 @@ public class SecurityConfig {
                 http
                                 .securityMatcher("/api/**")
                                 .cors(cors -> cors.configurationSource(cors()))
-
-                                .csrf(csrf -> csrf
-                                                .csrfTokenRepository(csrfTokenRepository())
-                                                .csrfTokenRequestHandler(new ReactCsrfTokenRequestHandler())
-                                                .ignoringRequestMatchers("/api/auth/**", "/api/membership/**",
-                                                                "/api/stripe/**", "/api/newsletter/add-email",
-                                                                "/api/admin/**"))
+                                .csrf(AbstractHttpConfigurer::disable)
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers("/api/auth/**", "/api/csrf-token").permitAll()
+                                                .requestMatchers("/api/auth/**").permitAll()
                                                 .requestMatchers("/api/newsletter/add-email").permitAll()
                                                 .requestMatchers("/api/membership/register", "/api/membership/check")
                                                 .permitAll()
                                                 .requestMatchers("/api/stripe/webhook").permitAll()
+                                                .requestMatchers("/api/blog/**").hasAnyRole(
+                                                                "BLOG_EDITOR", "BLOG_MANAGER", "ADMIN", "SUPERADMIN")
                                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                                 .requestMatchers("/admin/**").hasRole("ADMIN")
                                                 .requestMatchers("/error").permitAll()
@@ -137,26 +132,12 @@ public class SecurityConfig {
                 config.setAllowedOrigins(List.of(appProperties.getFrontendUrl()));
                 config.setAllowCredentials(true);
                 config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-XSRF-TOKEN"));
+                config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
                 config.setExposedHeaders(List.of("Authorization"));
 
                 UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
                 source.registerCorsConfiguration("/**", config);
                 return source;
-        }
-
-        private CsrfTokenRepository csrfTokenRepository() {
-                CookieCsrfTokenRepository repository = CookieCsrfTokenRepository.withHttpOnlyFalse();
-
-                repository.setCookieCustomizer(cookieBuilder -> {
-                        cookieBuilder
-                                        .path("/")
-                                        .secure(true)
-                                        .sameSite("None")
-                                        .httpOnly(false);
-                });
-
-                return repository;
         }
 
         @Bean

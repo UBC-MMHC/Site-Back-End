@@ -31,6 +31,7 @@ public class Membership {
     @Column(nullable = false)
     private String fullName;
 
+    @Version
     @Column(nullable = false)
     private String email;
 
