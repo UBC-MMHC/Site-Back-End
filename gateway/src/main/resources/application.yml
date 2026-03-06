@@ -22,9 +22,9 @@ spring:
           uri: ${BACKEND_URI:http://localhost:8081}
           predicates:
             - Path=/api/stripe/webhook
-        # Auth routes
+        # Auth routes (Phase 2.1: routes to auth-service when AUTH_SERVICE_URI is set)
         - id: auth
-          uri: ${BACKEND_URI:http://localhost:8081}
+          uri: ${AUTH_SERVICE_URI:${BACKEND_URI:http://localhost:8081}}
           predicates:
             - Path=/api/auth/**,/login/**,/oauth2/**
         # User routes

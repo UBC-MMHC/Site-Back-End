@@ -21,7 +21,10 @@ contracts/
 
 ## JWT Claims
 
-All services validate JWTs using the same secret. See `schemas/jwt-claims.json` for the canonical claims schema.
+All services validate JWTs using the same secret (`JWT_SECRET_TOKEN`). See `schemas/jwt-claims.json` for the canonical claims schema.
+
+- **Java**: Use the `jwt-validation` library (see `../jwt-validation/README.md`)
+- **Rust**: Use `jsonwebtoken` crate—see `docs/rust-jwt-validation.md`
 
 ## Usage
 

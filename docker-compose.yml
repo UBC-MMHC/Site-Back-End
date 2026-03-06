@@ -1,6 +1,6 @@
-# Local development: Gateway + Redis + Monolith
-# Run: docker compose up -d redis
-# Then: start monolith on 8081, gateway on 8080 (see gateway/README.md)
+# Local development: Gateway + Redis + Monolith + Auth Service
+# Run: docker compose up -d redis postgres-auth
+# Then: start monolith on 8081, gateway on 8080, auth-service on 8082
 
 services:
   redis:
@@ -9,6 +9,20 @@ services:
       - "6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  postgres-auth:
+    image: postgres:16-alpine
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d auth_db"]
       interval: 5s
       timeout: 3s
       retries: 5
