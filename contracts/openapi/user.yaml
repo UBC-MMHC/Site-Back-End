@@ -32,6 +32,9 @@ paths:
                     format: email
                   name:
                     type: string
+                  newsletterSubscription:
+                    type: boolean
+                    description: Newsletter opt-in flag
                   roles:
                     type: array
                     items: { type: string }

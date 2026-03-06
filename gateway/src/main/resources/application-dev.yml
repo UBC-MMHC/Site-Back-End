@@ -5,7 +5,7 @@ spring:
     gateway:
       routes:
         - id: stripe-webhook
-          uri: ${BACKEND_URI:http://localhost:8081}
+          uri: ${MEMBERSHIP_SERVICE_URI:${BACKEND_URI:http://localhost:8081}}
           predicates:
             - Path=/api/stripe/webhook
         - id: auth
@@ -13,11 +13,11 @@ spring:
           predicates:
             - Path=/api/auth/**,/login/**,/oauth2/**
         - id: user
-          uri: ${BACKEND_URI:http://localhost:8081}
+          uri: ${USER_SERVICE_URI:${BACKEND_URI:http://localhost:8081}}
           predicates:
             - Path=/api/user/**
         - id: membership
-          uri: ${BACKEND_URI:http://localhost:8081}
+          uri: ${MEMBERSHIP_SERVICE_URI:${BACKEND_URI:http://localhost:8081}}
           predicates:
             - Path=/api/membership/**
         - id: newsletter
@@ -25,7 +25,7 @@ spring:
           predicates:
             - Path=/api/newsletter/**
         - id: admin-memberships
-          uri: ${BACKEND_URI:http://localhost:8081}
+          uri: ${MEMBERSHIP_SERVICE_URI:${BACKEND_URI:http://localhost:8081}}
           predicates:
             - Path=/api/admin/memberships/**
         - id: admin-users

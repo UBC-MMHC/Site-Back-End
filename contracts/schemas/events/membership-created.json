@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MembershipCreated",
+  "description": "Event published when a membership is created with newsletter opt-in",
+  "type": "object",
+  "required": ["specversion", "type", "source", "data"],
+  "properties": {
+    "specversion": { "type": "string", "const": "1.0" },
+    "type": { "type": "string", "const": "com.ubcmmhc.membership.created" },
+    "source": { "type": "string", "const": "/membership-service" },
+    "data": {
+      "type": "object",
+      "required": ["membershipId", "email", "newsletterOptIn"],
+      "properties": {
+        "membershipId": { "type": "string", "format": "uuid" },
+        "email": { "type": "string", "format": "email" },
+        "newsletterOptIn": { "type": "boolean" }
+      }
+    }
+  }
+}

@@ -35,6 +35,8 @@ public class User {
 
     private String name;
 
+    private boolean newsletterSubscription = false;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "user_id"),
