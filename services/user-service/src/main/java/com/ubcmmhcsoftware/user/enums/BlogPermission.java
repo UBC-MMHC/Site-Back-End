@@ -1,4 +1,6 @@
-package com.ubcmmhcsoftware.ubcmmhc_web.Enum;
+package com.ubcmmhcsoftware.user.enums;
+
+import com.ubcmmhcsoftware.user.entity.RoleEnum;
 
 import java.util.Collection;
 import java.util.Set;
@@ -23,12 +25,6 @@ public enum BlogPermission {
         this.grantedBy = grantedBy;
     }
 
-    /**
-     * Returns {@code true} if any of the supplied role names match a role that
-     * grants this permission.
-     *
-     * @param roleNames authority strings, e.g. {@code "ROLE_ADMIN"}
-     */
     public boolean isGrantedByAny(Collection<String> roleNames) {
         return roleNames.stream()
                 .anyMatch(name -> grantedBy.stream()

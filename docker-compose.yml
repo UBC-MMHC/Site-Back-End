@@ -1,7 +1,7 @@
-# Local development: Gateway + Redis + Monolith + Auth + User + Membership + Newsletter
-# Shared database (Phase 4): All services use the same PostgreSQL instance.
+# Local development: Gateway + Auth + User + Membership + Newsletter
+# Shared database: All services use the same PostgreSQL instance.
 # Run: docker compose up -d redis postgres rabbitmq
-# Then: monolith 8081, gateway 8080, auth 8082, user 8083, membership 8084, newsletter 8085
+# Then: gateway 8080, auth 8082, user 8083, membership 8084, newsletter 8085
 #
 # Env for services: POSTGRES_DB=site_db POSTGRES_USER=postgres POSTGRES_PASSWORD=postgres
 #                  RAILWAY_TCP_PROXY_DOMAIN=localhost RAILWAY_TCP_PROXY_PORT=5432

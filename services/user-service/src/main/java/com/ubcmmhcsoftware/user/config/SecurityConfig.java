@@ -32,6 +32,8 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/api/user/internal/**").permitAll()
                         .requestMatchers("/api/admin/users/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/api/blog/**").hasAnyAuthority(
+                                "ROLE_BLOG_EDITOR", "ROLE_BLOG_MANAGER", "ROLE_ADMIN", "ROLE_SUPERADMIN")
                         .requestMatchers("/api/user/**").authenticated()
                         .anyRequest().denyAll())
                 .exceptionHandling(e -> e
