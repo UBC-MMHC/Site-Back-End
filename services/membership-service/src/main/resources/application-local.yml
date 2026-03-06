@@ -1,7 +1,7 @@
-# Local dev overrides - create local.properties or use env vars
+# Local dev overrides - use with docker postgres (site_db)
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5434/membership_db
+    url: jdbc:postgresql://localhost:5432/site_db
     username: postgres
     password: postgres
   rabbitmq:

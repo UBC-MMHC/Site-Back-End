@@ -17,4 +17,9 @@ public class NoOpMembershipEventPublisher implements MembershipEventPublisher {
         log.debug("NoOp: would publish MembershipCreated for {} (newsletterOptIn={})",
                 event.getMembershipId(), event.isNewsletterOptIn());
     }
+
+    @Override
+    public void publishMembershipActivated(MembershipActivatedEvent event) {
+        log.debug("NoOp: would publish MembershipActivated for {}", event.getMembershipId());
+    }
 }

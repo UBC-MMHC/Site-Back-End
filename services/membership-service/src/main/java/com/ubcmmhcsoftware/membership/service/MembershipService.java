@@ -2,10 +2,12 @@ package com.ubcmmhcsoftware.membership.service;
 
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
+import com.ubcmmhcsoftware.membership.client.UserServiceClient;
 import com.ubcmmhcsoftware.membership.dto.CheckoutSessionDTO;
 import com.ubcmmhcsoftware.membership.dto.MembershipRegistrationDTO;
 import com.ubcmmhcsoftware.membership.entity.Membership;
 import com.ubcmmhcsoftware.membership.enums.PaymentMethod;
+import com.ubcmmhcsoftware.membership.event.MembershipActivatedEvent;
 import com.ubcmmhcsoftware.membership.event.MembershipCreatedEvent;
 import com.ubcmmhcsoftware.membership.event.MembershipEventPublisher;
 import com.ubcmmhcsoftware.membership.repository.MembershipRepository;
@@ -27,9 +29,13 @@ public class MembershipService {
     private final MembershipRepository membershipRepository;
     private final StripeService stripeService;
     private final MembershipEventPublisher eventPublisher;
+    private final UserServiceClient userServiceClient;
 
     @Transactional
     public CheckoutSessionDTO createMembership(MembershipRegistrationDTO dto, UUID userId) throws StripeException {
+        if (userId != null && !userServiceClient.userExists(userId)) {
+            throw new IllegalStateException("User not found. Please log in again.");
+        }
         if (membershipRepository.existsByEmail(dto.getEmail())) {
             throw new IllegalStateException("A membership already exists for this email");
         }
@@ -112,6 +118,13 @@ public class MembershipService {
 
         membershipRepository.save(membership);
         log.info("Activated membership {} for {} via Stripe", membership.getId(), membership.getEmail());
+
+        eventPublisher.publishMembershipActivated(MembershipActivatedEvent.builder()
+                .membershipId(membership.getId())
+                .email(membership.getEmail())
+                .userId(membership.getUserId())
+                .paymentMethod(PaymentMethod.STRIPE)
+                .build());
     }
 
     public Optional<Membership> getMembershipByEmail(String email) {
@@ -167,6 +180,13 @@ public class MembershipService {
         membershipRepository.save(membership);
         log.info("Manually approved membership {} for {} by admin {} via {}",
                 membership.getId(), memberEmail, adminEmail, paymentMethod);
+
+        eventPublisher.publishMembershipActivated(MembershipActivatedEvent.builder()
+                .membershipId(membership.getId())
+                .email(membership.getEmail())
+                .userId(membership.getUserId())
+                .paymentMethod(paymentMethod)
+                .build());
     }
 
     public List<Membership> getPendingMemberships() {
