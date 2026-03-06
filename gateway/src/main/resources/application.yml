@@ -17,9 +17,9 @@ spring:
             exposedHeaders: Authorization
             allowCredentials: true
       routes:
-        # Stripe webhook - no rate limit, must come before membership
+        # Stripe webhook - no rate limit, routes to membership-service (Phase 2.3)
         - id: stripe-webhook
-          uri: ${BACKEND_URI:http://localhost:8081}
+          uri: ${MEMBERSHIP_SERVICE_URI:${BACKEND_URI:http://localhost:8081}}
           predicates:
             - Path=/api/stripe/webhook
         # Auth routes (Phase 2.1: routes to auth-service when AUTH_SERVICE_URI is set)
@@ -27,14 +27,14 @@ spring:
           uri: ${AUTH_SERVICE_URI:${BACKEND_URI:http://localhost:8081}}
           predicates:
             - Path=/api/auth/**,/login/**,/oauth2/**
-        # User routes
+        # User routes (Phase 2.2: routes to user-service when USER_SERVICE_URI is set)
         - id: user
-          uri: ${BACKEND_URI:http://localhost:8081}
+          uri: ${USER_SERVICE_URI:${BACKEND_URI:http://localhost:8081}}
           predicates:
             - Path=/api/user/**
-        # Membership routes (excluding webhook)
+        # Membership routes (Phase 2.3: routes to membership-service)
         - id: membership
-          uri: ${BACKEND_URI:http://localhost:8081}
+          uri: ${MEMBERSHIP_SERVICE_URI:${BACKEND_URI:http://localhost:8081}}
           predicates:
             - Path=/api/membership/**
           filters:
@@ -43,14 +43,14 @@ spring:
                 key-resolver: "#{@ipKeyResolver}"
                 redis-rate-limiter.replenishRate: 100
                 redis-rate-limiter.burstCapacity: 100
-        # Newsletter routes
+        # Newsletter routes (Phase 2.4: routes to newsletter-service when NEWSLETTER_SERVICE_URI is set)
         - id: newsletter
-          uri: ${BACKEND_URI:http://localhost:8081}
+          uri: ${NEWSLETTER_SERVICE_URI:${BACKEND_URI:http://localhost:8081}}
           predicates:
             - Path=/api/newsletter/**
-        # Admin - memberships
+        # Admin - memberships (Phase 2.3: routes to membership-service)
         - id: admin-memberships
-          uri: ${BACKEND_URI:http://localhost:8081}
+          uri: ${MEMBERSHIP_SERVICE_URI:${BACKEND_URI:http://localhost:8081}}
           predicates:
             - Path=/api/admin/memberships/**
         # Admin - users
