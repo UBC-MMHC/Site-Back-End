@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -85,7 +86,7 @@ public class AuthController {
      * Used by OAuth2 flow where the token is passed via URL redirect.
      */
     @PostMapping("/set-token")
-    public ResponseEntity<?> setToken(@RequestBody java.util.Map<String, String> body, HttpServletResponse response) {
+    public ResponseEntity<?> setToken(@RequestBody Map<String, String> body, HttpServletResponse response) {
         String token = body.get("token");
 
         if (token == null || token.isEmpty()) {

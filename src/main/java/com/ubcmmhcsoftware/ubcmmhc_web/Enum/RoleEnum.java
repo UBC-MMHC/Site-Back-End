@@ -2,8 +2,10 @@ package com.ubcmmhcsoftware.ubcmmhc_web.Enum;
 
 public enum RoleEnum {
     ROLE_USER(1),
-    ROLE_ADMIN(2),
-    ROLE_SUPERADMIN(3);
+    ROLE_BLOG_EDITOR(2),
+    ROLE_BLOG_MANAGER(3),
+    ROLE_ADMIN(4),
+    ROLE_SUPERADMIN(5);
 
     private final int level;
 
