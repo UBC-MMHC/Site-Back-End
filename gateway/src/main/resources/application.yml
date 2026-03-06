@@ -1,0 +1,94 @@
+server:
+  port: ${GATEWAY_PORT:8080}
+
+spring:
+  application:
+    name: gateway
+  profiles:
+    active: ${APPLICATION_PROFILE:dev}
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: ${FRONTEND_URL:http://localhost:3000}
+            allowedMethods: GET, POST, PUT, DELETE, OPTIONS
+            allowedHeaders: Authorization, Content-Type
+            exposedHeaders: Authorization
+            allowCredentials: true
+      routes:
+        # Stripe webhook - no rate limit, must come before membership
+        - id: stripe-webhook
+          uri: ${BACKEND_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/stripe/webhook
+        # Auth routes
+        - id: auth
+          uri: ${BACKEND_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/auth/**,/login/**,/oauth2/**
+        # User routes
+        - id: user
+          uri: ${BACKEND_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/user/**
+        # Membership routes (excluding webhook)
+        - id: membership
+          uri: ${BACKEND_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/membership/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                key-resolver: "#{@ipKeyResolver}"
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 100
+        # Newsletter routes
+        - id: newsletter
+          uri: ${BACKEND_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/newsletter/**
+        # Admin - memberships
+        - id: admin-memberships
+          uri: ${BACKEND_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/admin/memberships/**
+        # Admin - users
+        - id: admin-users
+          uri: ${BACKEND_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/admin/users/**
+        # Blog routes
+        - id: blog
+          uri: ${BACKEND_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/blog/**
+        # Catch-all for remaining API routes (monolith during Phase 1)
+        - id: backend
+          uri: ${BACKEND_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/**,/error
+          filters:
+            - name: RequestRateLimiter
+              args:
+                key-resolver: "#{@ipKeyResolver}"
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 100
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:3000}
+  jwt:
+    secret: ${JWT_SECRET_TOKEN}
+  jwt-cookie:
+    name: ${JWT_COOKIE_NAME:JWT}
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    org.springframework.security: INFO

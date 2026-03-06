@@ -1,0 +1,14 @@
+# Local development: Gateway + Redis + Monolith
+# Run: docker compose up -d redis
+# Then: start monolith on 8081, gateway on 8080 (see gateway/README.md)
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
