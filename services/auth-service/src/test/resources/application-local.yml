@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:auth_db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false
+
+spring.jwt.secret: test-secret-at-least-32-characters-long-for-hs256
+app.frontend-url: http://localhost:3000
+brevo.api-key: test-key
+spring.mail.sender_email: test@example.com
+
+# OAuth2 - dummy values for tests (no real Google login in tests)
+spring.security.oauth2.client.registration.google.client-id: test-client-id
+spring.security.oauth2.client.registration.google.client-secret: test-client-secret
