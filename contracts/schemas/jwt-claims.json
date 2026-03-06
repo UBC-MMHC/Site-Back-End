@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ubcmmhc.com/schemas/jwt-claims.json",
+  "title": "JWT Claims Schema",
+  "description": "Canonical JWT payload schema. Auth Service is the sole issuer; all services validate using JWT_SECRET_TOKEN.",
+  "type": "object",
+  "required": ["sub", "roles", "exp", "iat"],
+  "properties": {
+    "sub": {
+      "type": "string",
+      "format": "uuid",
+      "description": "User ID (UUID)"
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "User email (optional; recommended for gateway header forwarding)"
+    },
+    "roles": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Authorities, e.g. ROLE_USER, ROLE_ADMIN, ROLE_SUPERADMIN"
+    },
+    "exp": {
+      "type": "integer",
+      "description": "Expiration time (Unix timestamp)"
+    },
+    "iat": {
+      "type": "integer",
+      "description": "Issued at time (Unix timestamp)"
+    }
+  }
+}

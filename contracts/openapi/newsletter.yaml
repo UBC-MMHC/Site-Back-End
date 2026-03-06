@@ -1,0 +1,34 @@
+openapi: 3.0.3
+info:
+  title: Newsletter Service API
+  description: Brevo subscription, newsletter signup
+  version: 1.0.0
+
+servers:
+  - url: /api/newsletter
+    description: Newsletter API base path
+
+paths:
+  /add-email:
+    post:
+      summary: Subscribe email to newsletter
+      operationId: addEmail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscribeToNewsletterRequest'
+      responses:
+        '200':
+          description: Email subscribed to the newsletter
+        '409':
+          description: Email already subscribed (optional; service may return 200)
+
+components:
+  schemas:
+    SubscribeToNewsletterRequest:
+      type: object
+      required: [email]
+      properties:
+        email: { type: string, format: email }

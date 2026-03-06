@@ -1,0 +1,51 @@
+openapi: 3.0.3
+info:
+  title: User Service API
+  description: User profile, roles, newsletter subscription flag
+  version: 1.0.0
+
+servers:
+  - url: /api/user
+    description: User API base path
+
+paths:
+  /info:
+    get:
+      summary: Get current user profile and roles
+      operationId: userInfo
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile (OAuth2 attributes or user details)
+          content:
+            application/json:
+              schema:
+                type: object
+                description: OAuth2 principal attributes or user profile
+                properties:
+                  sub:
+                    type: string
+                    description: User ID
+                  email:
+                    type: string
+                    format: email
+                  name:
+                    type: string
+                  roles:
+                    type: array
+                    items: { type: string }
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (requires ROLE_USER)
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  security:
+    - bearerAuth: []
