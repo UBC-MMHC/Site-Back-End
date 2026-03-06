@@ -3,7 +3,7 @@ spring:
     import: classpath:local.properties
 
   datasource:
-    url: jdbc:postgresql://${RAILWAY_TCP_PROXY_DOMAIN}:${RAILWAY_TCP_PROXY_PORT}/${POSTGRES_DB}?sslmode=${SSL_MODE}
+    url: jdbc:postgresql://${RAILWAY_TCP_PROXY_DOMAIN}:${RAILWAY_TCP_PROXY_PORT}/${POSTGRES_DB:site_db}?sslmode=${SSL_MODE}
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
   jpa:

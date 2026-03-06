@@ -1,15 +1,16 @@
-# Local development overrides (use with profile 'local')
+# Local development - use with docker postgres (site_db) or H2 for tests
 spring:
   datasource:
-    url: jdbc:h2:mem:newsletter_db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    username: sa
-    password:
+    url: jdbc:postgresql://localhost:5432/site_db
+    username: postgres
+    password: postgres
   jpa:
     hibernate:
       ddl-auto: validate
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
   flyway:
     enabled: true
+    table: flyway_newsletter_schema_history
   rabbitmq:
     host: localhost
     port: 5672

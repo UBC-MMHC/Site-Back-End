@@ -1,6 +1,10 @@
 # Local development: Gateway + Redis + Monolith + Auth + User + Membership + Newsletter
-# Run: docker compose up -d redis postgres-auth postgres-membership postgres-newsletter rabbitmq
+# Shared database (Phase 4): All services use the same PostgreSQL instance.
+# Run: docker compose up -d redis postgres rabbitmq
 # Then: monolith 8081, gateway 8080, auth 8082, user 8083, membership 8084, newsletter 8085
+#
+# Env for services: POSTGRES_DB=site_db POSTGRES_USER=postgres POSTGRES_PASSWORD=postgres
+#                  RAILWAY_TCP_PROXY_DOMAIN=localhost RAILWAY_TCP_PROXY_PORT=5432
 
 services:
   redis:
@@ -13,44 +17,16 @@ services:
       timeout: 3s
       retries: 5
 
-  postgres-auth:
+  postgres:
     image: postgres:16-alpine
     ports:
-      - "5433:5432"
+      - "5432:5432"
     environment:
-      POSTGRES_DB: auth_db
+      POSTGRES_DB: site_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d auth_db"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-
-  postgres-membership:
-    image: postgres:16-alpine
-    ports:
-      - "5434:5432"
-    environment:
-      POSTGRES_DB: membership_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d membership_db"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-
-  postgres-newsletter:
-    image: postgres:16-alpine
-    ports:
-      - "5435:5432"
-    environment:
-      POSTGRES_DB: newsletter_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d newsletter_db"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d site_db"]
       interval: 5s
       timeout: 3s
       retries: 5
