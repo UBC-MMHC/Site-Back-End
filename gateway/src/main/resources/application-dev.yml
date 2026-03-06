@@ -29,7 +29,7 @@ spring:
           predicates:
             - Path=/api/admin/memberships/**
         - id: admin-users
-          uri: ${BACKEND_URI:http://localhost:8081}
+          uri: ${USER_SERVICE_URI:http://localhost:8083}
           predicates:
             - Path=/api/admin/users/**
         - id: blog
