@@ -37,6 +37,7 @@ import java.util.List;
 public class SecurityConfig {
 
         private final CustomOAuth2UserService customOAuth2UserService;
+        private final GatewayTrustFilter gatewayTrustFilter;
         private final JWTAuthenticationFilter jwtAuthenticationFilter;
         private final MyOAuth2SuccessHandler myOAuth2SuccessHandler;
         private final AppProperties appProperties;
@@ -77,6 +78,7 @@ public class SecurityConfig {
                                                 .authenticationEntryPoint(
                                                                 new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)));
 
+                http.addFilterBefore(gatewayTrustFilter, UsernamePasswordAuthenticationFilter.class);
                 http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
                 return http.build();
@@ -115,6 +117,7 @@ public class SecurityConfig {
                                                 .authenticationEntryPoint(
                                                                 new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)));
 
+                http.addFilterBefore(gatewayTrustFilter, UsernamePasswordAuthenticationFilter.class);
                 http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
                 return http.build();
