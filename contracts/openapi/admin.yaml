@@ -1,0 +1,140 @@
+openapi: 3.0.3
+info:
+  title: Admin API
+  description: Admin operations. Routes split between User Service and Membership Service.
+  version: 1.0.0
+
+servers:
+  - url: /api/admin
+    description: Admin API base path
+
+paths:
+  # User Service (role assignment)
+  /users/{userEmail}/role:
+    post:
+      summary: Assign role to user
+      operationId: assignRole
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userEmail
+          in: path
+          required: true
+          schema: { type: string, format: email }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role:
+                  type: string
+                  enum: [ROLE_USER, ROLE_BLOG_EDITOR, ROLE_BLOG_MANAGER, ROLE_ADMIN, ROLE_SUPERADMIN]
+      responses:
+        '200':
+          description: Role assigned successfully
+        '400':
+          description: Invalid role
+        '401':
+          description: Unauthorized
+        '403':
+          description: Cannot assign role higher than your own
+        '404':
+          description: User not found
+    delete:
+      summary: Remove role from user
+      operationId: removeRole
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userEmail
+          in: path
+          required: true
+          schema: { type: string, format: email }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role: { type: string }
+      responses:
+        '200':
+          description: Role removed successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Cannot remove role higher than your own
+        '404':
+          description: User not found
+
+  # Membership Service (pending memberships, approval)
+  /memberships/pending:
+    get:
+      summary: Get pending (unpaid) memberships
+      operationId: getPendingMemberships
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of pending memberships
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PendingMembership'
+        '401':
+          description: Unauthorized
+
+  /memberships/{memberEmail}/approve:
+    post:
+      summary: Manually approve membership (cash/e-transfer)
+      operationId: approveMembership
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: memberEmail
+          in: path
+          required: true
+          schema: { type: string, format: email }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [paymentMethod]
+              properties:
+                paymentMethod:
+                  type: string
+                  enum: [CASH, ETRANSFER, OTHER]
+      responses:
+        '200':
+          description: Membership approved successfully
+        '400':
+          description: Invalid payment method (STRIPE not allowed for manual approval)
+        '401':
+          description: Unauthorized
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    PendingMembership:
+      type: object
+      properties:
+        email: { type: string }
+        fullName: { type: string }
+        membershipType: { type: string }
+        studentId: { type: string }
+        instagram: { type: string }
+        paymentStatus: { type: string }

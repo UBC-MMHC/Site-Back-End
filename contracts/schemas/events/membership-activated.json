@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MembershipActivated",
+  "description": "CloudEvents event published when a membership is activated (Stripe payment or manual approval)",
+  "type": "object",
+  "required": ["specversion", "type", "source", "data"],
+  "properties": {
+    "specversion": { "type": "string", "const": "1.0" },
+    "type": { "type": "string", "const": "com.ubcmmhc.membership.activated" },
+    "source": { "type": "string", "const": "/membership-service" },
+    "data": {
+      "type": "object",
+      "required": ["membershipId", "email", "userId"],
+      "properties": {
+        "membershipId": { "type": "string", "format": "uuid" },
+        "email": { "type": "string", "format": "email" },
+        "userId": { "type": ["string", "null"], "description": "Optional linked user ID (UUID)" },
+        "paymentMethod": { "type": "string", "enum": ["STRIPE", "MANUAL"] }
+      }
+    }
+  }
+}

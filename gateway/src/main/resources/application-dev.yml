@@ -1,0 +1,38 @@
+# Dev profile: use in-memory-friendly config.
+# For local dev without Redis, use profile "dev-no-redis" to skip rate limiting.
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: stripe-webhook
+          uri: ${MEMBERSHIP_SERVICE_URI:http://localhost:8084}
+          predicates:
+            - Path=/api/stripe/webhook
+        - id: auth
+          uri: ${AUTH_SERVICE_URI:http://localhost:8082}
+          predicates:
+            - Path=/api/auth/**,/login/**,/oauth2/**
+        - id: user
+          uri: ${USER_SERVICE_URI:http://localhost:8083}
+          predicates:
+            - Path=/api/user/**
+        - id: blog
+          uri: ${USER_SERVICE_URI:http://localhost:8083}
+          predicates:
+            - Path=/api/blog/**
+        - id: membership
+          uri: ${MEMBERSHIP_SERVICE_URI:http://localhost:8084}
+          predicates:
+            - Path=/api/membership/**
+        - id: newsletter
+          uri: ${NEWSLETTER_SERVICE_URI:http://localhost:8085}
+          predicates:
+            - Path=/api/newsletter/**
+        - id: admin-memberships
+          uri: ${MEMBERSHIP_SERVICE_URI:http://localhost:8084}
+          predicates:
+            - Path=/api/admin/memberships/**
+        - id: admin-users
+          uri: ${USER_SERVICE_URI:http://localhost:8083}
+          predicates:
+            - Path=/api/admin/users/**

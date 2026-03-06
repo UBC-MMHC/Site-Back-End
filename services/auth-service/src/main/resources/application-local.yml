@@ -1,0 +1,17 @@
+# Local development with H2 in-memory database (unit tests only)
+# For running services locally with shared DB, use dev profile + docker postgres (site_db)
+spring:
+  datasource:
+    url: jdbc:h2:mem:auth_db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false

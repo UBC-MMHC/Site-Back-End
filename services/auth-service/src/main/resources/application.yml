@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: auth-service
+  profiles:
+    active: ${APPLICATION_PROFILE:dev}
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            clientId: ${GOOGLE_CLIENT_ID}
+            clientSecret: ${GOOGLE_CLIENT_SECRET}
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope:
+              - email
+              - profile
+  jwt:
+    secret: ${JWT_SECRET_TOKEN}
+
+brevo:
+  base-url: ${BREVO_BASE_URL}
+  api-key: ${BREVO_API_KEY}
+
+server:
+  forward-headers-strategy: framework
+  port: ${AUTH_SERVICE_PORT:8082}
+
+app:
+  frontend-url: ${FRONTEND_URL}
+  jwt-cookie:
+    secure: ${JWT_COOKIE_SECURE:true}
+    same-site: ${JWT_COOKIE_SAME_SITE:None}
+    name: ${JWT_COOKIE_NAME:JWT}
+  jwt:
+    expiration-seconds: ${JWT_EXPIRATION_SECONDS:604800}
+
+logging:
+  level:
+    org.springframework.security: INFO

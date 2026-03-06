@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: user-service
+  profiles:
+    active: ${APPLICATION_PROFILE:dev}
+  datasource:
+    url: jdbc:postgresql://${RAILWAY_TCP_PROXY_DOMAIN:localhost}:${RAILWAY_TCP_PROXY_PORT:5432}/${POSTGRES_DB:site_db}?sslmode=${SSL_MODE:disable}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: false  # Auth service owns auth schema; user-service shares site_db
+
+app:
+  internal-service-key: ${INTERNAL_SERVICE_KEY:}
+
+server:
+  forward-headers-strategy: framework
+  port: ${USER_SERVICE_PORT:8083}
+
+logging:
+  level:
+    org.springframework.security: INFO

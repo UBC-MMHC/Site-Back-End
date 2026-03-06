@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ubcmmhc.com/schemas/dto/newsletter-subscribe.json",
+  "title": "SubscribeToNewsletterRequest",
+  "type": "object",
+  "required": ["email"],
+  "properties": {
+    "email": { "type": "string", "format": "email" }
+  }
+}

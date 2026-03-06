@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${RAILWAY_TCP_PROXY_DOMAIN}:${RAILWAY_TCP_PROXY_PORT}/${POSTGRES_DB}?sslmode=${SSL_MODE:require}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASSWORD}

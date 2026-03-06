@@ -1,0 +1,16 @@
+# Local development - use with docker postgres (site_db) or H2 for tests
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/site_db
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    table: flyway_newsletter_schema_history
+  rabbitmq:
+    host: localhost
+    port: 5672

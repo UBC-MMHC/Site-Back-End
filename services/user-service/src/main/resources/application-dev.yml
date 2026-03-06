@@ -1,0 +1,12 @@
+spring:
+  config:
+    import: optional:file:./local.properties
+
+  datasource:
+    url: jdbc:postgresql://${RAILWAY_TCP_PROXY_DOMAIN:localhost}:${RAILWAY_TCP_PROXY_PORT:5432}/${POSTGRES_DB:site_db}?sslmode=${SSL_MODE:disable}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect

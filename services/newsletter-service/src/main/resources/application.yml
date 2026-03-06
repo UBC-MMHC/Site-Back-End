@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: newsletter-service
+  profiles:
+    active: ${APPLICATION_PROFILE:dev}
+
+brevo:
+  base-url: ${BREVO_BASE_URL}
+  api-key: ${BREVO_API_KEY}
+  newsletter-list-id: ${BREVO_NEWSLETTER_LIST_ID}
+
+server:
+  forward-headers-strategy: framework
+  port: ${NEWSLETTER_SERVICE_PORT:8085}
+
+logging:
+  level:
+    com.ubcmmhcsoftware.newsletter: INFO
