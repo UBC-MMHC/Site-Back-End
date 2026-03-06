@@ -4,7 +4,7 @@ spring:
   profiles:
     active: ${APPLICATION_PROFILE:dev}
   datasource:
-    url: jdbc:postgresql://${RAILWAY_TCP_PROXY_DOMAIN:localhost}:${RAILWAY_TCP_PROXY_PORT:5432}/${POSTGRES_DB:auth_db}?sslmode=${SSL_MODE:disable}
+    url: jdbc:postgresql://${RAILWAY_TCP_PROXY_DOMAIN:localhost}:${RAILWAY_TCP_PROXY_PORT:5432}/${POSTGRES_DB:site_db}?sslmode=${SSL_MODE:disable}
     username: ${POSTGRES_USER:postgres}
     password: ${POSTGRES_PASSWORD:postgres}
   jpa:
@@ -15,7 +15,10 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   flyway:
-    enabled: false  # Auth service owns auth_db schema; user-service shares the DB
+    enabled: false  # Auth service owns auth schema; user-service shares site_db
+
+app:
+  internal-service-key: ${INTERNAL_SERVICE_KEY:}
 
 server:
   forward-headers-strategy: framework
