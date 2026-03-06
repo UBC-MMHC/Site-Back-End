@@ -19,13 +19,35 @@ stripe:
     non-ubc-student: ${STRIPE_PRICE_NON_UBC_STUDENT}
     non-student: ${STRIPE_PRICE_NON_STUDENT}
 
+app:
+  user-service:
+    url: ${USER_SERVICE_URL:http://localhost:8083}
+    internal-key: ${INTERNAL_SERVICE_KEY:}
+
 membership:
   events:
     exchange: membership.events
-    queue:
-      membership-created: membership.created
     routing-key:
       membership-created: membership.created
+      membership-activated: membership.activated
+
+# Resilience4j for User Service client (Phase 3.1)
+resilience4j:
+  retry:
+    instances:
+      userService:
+        maxAttempts: 3
+        waitDuration: 500ms
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+  circuitbreaker:
+    instances:
+      userService:
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
 
 logging:
   level:

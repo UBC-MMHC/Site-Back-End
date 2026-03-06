@@ -1,9 +1,8 @@
 package com.ubcmmhcsoftware.membership.config;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,24 +15,17 @@ public class RabbitMQConfig {
     @Value("${membership.events.exchange:membership.events}")
     private String exchange;
 
-    @Value("${membership.events.queue.membership-created:membership.created}")
-    private String queueName;
-
-    @Value("${membership.events.routing-key.membership-created:membership.created}")
-    private String routingKey;
-
+    /**
+     * TopicExchange to align with Newsletter Service.
+     * Routing keys: membership.created, membership.activated
+     */
     @Bean
-    DirectExchange membershipEventsExchange() {
-        return new DirectExchange(exchange, true, false);
+    TopicExchange membershipEventsExchange() {
+        return new TopicExchange(exchange, true, false);
     }
 
     @Bean
-    Queue membershipCreatedQueue() {
-        return new Queue(queueName, true);
-    }
-
-    @Bean
-    Binding membershipCreatedBinding(Queue membershipCreatedQueue, DirectExchange membershipEventsExchange) {
-        return BindingBuilder.bind(membershipCreatedQueue).to(membershipEventsExchange).with(routingKey);
+    MessageConverter jsonMessageConverter() {
+        return new Jackson2JsonMessageConverter();
     }
 }
