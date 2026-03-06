@@ -53,9 +53,9 @@ spring:
           uri: ${MEMBERSHIP_SERVICE_URI:${BACKEND_URI:http://localhost:8081}}
           predicates:
             - Path=/api/admin/memberships/**
-        # Admin - users
+        # Admin - users (Phase 2.5: routes to user-service)
         - id: admin-users
-          uri: ${BACKEND_URI:http://localhost:8081}
+          uri: ${USER_SERVICE_URI:${BACKEND_URI:http://localhost:8083}}
           predicates:
             - Path=/api/admin/users/**
         # Blog routes

@@ -9,6 +9,24 @@ servers:
     description: User API base path
 
 paths:
+  /internal/exists/{userId}:
+    get:
+      summary: Check if user exists (internal, service-to-service only)
+      description: Used by Membership Service to verify user existence before linking. Requires X-Internal-Service-Key header.
+      operationId: userExists
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: User exists
+        '404':
+          description: User not found
+        '401':
+          description: Invalid or missing internal service key
+
   /info:
     get:
       summary: Get current user profile and roles
