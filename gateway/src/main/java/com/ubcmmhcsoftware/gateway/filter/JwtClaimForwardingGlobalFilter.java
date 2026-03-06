@@ -1,6 +1,7 @@
 package com.ubcmmhcsoftware.gateway.filter;
 
 import com.ubcmmhcsoftware.gateway.config.GatewayAppProperties;
+import com.ubcmmhcsoftware.jwt.JwtTokenExtractor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -27,7 +28,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class JwtClaimForwardingGlobalFilter implements GlobalFilter, Ordered {
 
-    private static final String BEARER_PREFIX = "Bearer ";
     private static final String X_USER_ID = "X-User-Id";
     private static final String X_USER_EMAIL = "X-User-Email";
     private static final String X_USER_ROLES = "X-User-Roles";
@@ -117,13 +117,10 @@ public class JwtClaimForwardingGlobalFilter implements GlobalFilter, Ordered {
 
     private String extractToken(ServerHttpRequest request) {
         String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-        if (authHeader != null && authHeader.startsWith(BEARER_PREFIX)) {
-            return authHeader.substring(BEARER_PREFIX.length());
-        }
-        if (request.getCookies().containsKey(gatewayAppProperties.getJwtCookieName())) {
-            return request.getCookies().getFirst(gatewayAppProperties.getJwtCookieName()).getValue();
-        }
-        return null;
+        String cookieValue = request.getCookies().containsKey(gatewayAppProperties.getJwtCookieName())
+                ? request.getCookies().getFirst(gatewayAppProperties.getJwtCookieName()).getValue()
+                : null;
+        return JwtTokenExtractor.extract(authHeader, cookieValue);
     }
 
     private boolean isPublicPath(String path) {
