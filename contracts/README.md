@@ -15,6 +15,11 @@ contracts/
 │   └── admin.yaml
 ├── schemas/           # Shared DTOs and event schemas
 │   ├── dto/           # Request/response DTOs
+│   ├── events/        # CloudEvents JSON schemas (polyglot-ready)
+│   │   ├── membership-created.json
+│   │   ├── membership-activated.json
+│   │   ├── user-created.json
+│   │   └── newsletter-subscribe.json
 │   └── jwt-claims.json
 └── README.md
 ```
