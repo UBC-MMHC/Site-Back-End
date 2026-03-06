@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: membership-service
+  profiles:
+    active: ${APPLICATION_PROFILE:dev}
+
+server:
+  forward-headers-strategy: framework
+  port: ${MEMBERSHIP_SERVICE_PORT:8084}
+
+app:
+  frontend-url: ${FRONTEND_URL}
+
+stripe:
+  secret-key: ${STRIPE_SECRET_KEY}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET}
+  prices:
+    ubc-student: ${STRIPE_PRICE_UBC_STUDENT}
+    non-ubc-student: ${STRIPE_PRICE_NON_UBC_STUDENT}
+    non-student: ${STRIPE_PRICE_NON_STUDENT}
+
+membership:
+  events:
+    exchange: membership.events
+    queue:
+      membership-created: membership.created
+    routing-key:
+      membership-created: membership.created
+
+logging:
+  level:
+    org.springframework.security: INFO
