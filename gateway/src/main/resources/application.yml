@@ -17,24 +17,29 @@ spring:
             exposedHeaders: Authorization
             allowCredentials: true
       routes:
-        # Stripe webhook - no rate limit, routes to membership-service (Phase 2.3)
+        # Stripe webhook - no rate limit, routes to membership-service
         - id: stripe-webhook
-          uri: ${MEMBERSHIP_SERVICE_URI:${BACKEND_URI:http://localhost:8081}}
+          uri: ${MEMBERSHIP_SERVICE_URI:http://localhost:8084}
           predicates:
             - Path=/api/stripe/webhook
-        # Auth routes (Phase 2.1: routes to auth-service when AUTH_SERVICE_URI is set)
+        # Auth routes
         - id: auth
-          uri: ${AUTH_SERVICE_URI:${BACKEND_URI:http://localhost:8081}}
+          uri: ${AUTH_SERVICE_URI:http://localhost:8082}
           predicates:
             - Path=/api/auth/**,/login/**,/oauth2/**
-        # User routes (Phase 2.2: routes to user-service when USER_SERVICE_URI is set)
+        # User routes (includes /api/blog - blog permissions moved to user-service)
         - id: user
-          uri: ${USER_SERVICE_URI:${BACKEND_URI:http://localhost:8081}}
+          uri: ${USER_SERVICE_URI:http://localhost:8083}
           predicates:
             - Path=/api/user/**
-        # Membership routes (Phase 2.3: routes to membership-service)
+        # Blog routes - user-service (role-derived permissions)
+        - id: blog
+          uri: ${USER_SERVICE_URI:http://localhost:8083}
+          predicates:
+            - Path=/api/blog/**
+        # Membership routes
         - id: membership
-          uri: ${MEMBERSHIP_SERVICE_URI:${BACKEND_URI:http://localhost:8081}}
+          uri: ${MEMBERSHIP_SERVICE_URI:http://localhost:8084}
           predicates:
             - Path=/api/membership/**
           filters:
@@ -43,37 +48,21 @@ spring:
                 key-resolver: "#{@ipKeyResolver}"
                 redis-rate-limiter.replenishRate: 100
                 redis-rate-limiter.burstCapacity: 100
-        # Newsletter routes (Phase 2.4: routes to newsletter-service when NEWSLETTER_SERVICE_URI is set)
+        # Newsletter routes
         - id: newsletter
-          uri: ${NEWSLETTER_SERVICE_URI:${BACKEND_URI:http://localhost:8081}}
+          uri: ${NEWSLETTER_SERVICE_URI:http://localhost:8085}
           predicates:
             - Path=/api/newsletter/**
-        # Admin - memberships (Phase 2.3: routes to membership-service)
+        # Admin - memberships
         - id: admin-memberships
-          uri: ${MEMBERSHIP_SERVICE_URI:${BACKEND_URI:http://localhost:8081}}
+          uri: ${MEMBERSHIP_SERVICE_URI:http://localhost:8084}
           predicates:
             - Path=/api/admin/memberships/**
-        # Admin - users (Phase 2.5: routes to user-service)
+        # Admin - users
         - id: admin-users
-          uri: ${USER_SERVICE_URI:${BACKEND_URI:http://localhost:8083}}
+          uri: ${USER_SERVICE_URI:http://localhost:8083}
           predicates:
             - Path=/api/admin/users/**
-        # Blog routes
-        - id: blog
-          uri: ${BACKEND_URI:http://localhost:8081}
-          predicates:
-            - Path=/api/blog/**
-        # Catch-all for remaining API routes (monolith during Phase 1)
-        - id: backend
-          uri: ${BACKEND_URI:http://localhost:8081}
-          predicates:
-            - Path=/api/**,/error
-          filters:
-            - name: RequestRateLimiter
-              args:
-                key-resolver: "#{@ipKeyResolver}"
-                redis-rate-limiter.replenishRate: 100
-                redis-rate-limiter.burstCapacity: 100
 
   data:
     redis:

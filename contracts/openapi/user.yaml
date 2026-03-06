@@ -1,15 +1,15 @@
 openapi: 3.0.3
 info:
   title: User Service API
-  description: User profile, roles, newsletter subscription flag
+  description: User profile, roles, newsletter subscription, blog permissions
   version: 1.0.0
 
 servers:
-  - url: /api/user
-    description: User API base path
+  - url: /api
+    description: API base (User Service serves /user and /blog)
 
 paths:
-  /internal/exists/{userId}:
+  /user/internal/exists/{userId}:
     get:
       summary: Check if user exists (internal, service-to-service only)
       description: Used by Membership Service to verify user existence before linking. Requires X-Internal-Service-Key header.
@@ -27,7 +27,7 @@ paths:
         '401':
           description: Invalid or missing internal service key
 
-  /info:
+  /user/info:
     get:
       summary: Get current user profile and roles
       operationId: userInfo
@@ -60,6 +60,32 @@ paths:
           description: Unauthorized
         '403':
           description: Forbidden (requires ROLE_USER)
+
+  # Blog permissions (requires ROLE_BLOG_EDITOR, ROLE_BLOG_MANAGER, ROLE_ADMIN, or ROLE_SUPERADMIN)
+  /blog:
+    get:
+      summary: Get blog permissions for current user
+      description: Returns role-derived permissions (canCreate, canEdit, canDelete). Served at /api/blog.
+      operationId: getBlogPermissions
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Blog permissions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user: { type: string, description: User email }
+                  roles: { type: array, items: { type: string } }
+                  canCreate: { type: boolean }
+                  canEdit: { type: boolean }
+                  canDelete: { type: boolean }
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (requires blog role)
 
 components:
   securitySchemes:
