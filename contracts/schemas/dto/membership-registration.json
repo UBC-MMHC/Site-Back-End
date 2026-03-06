@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ubcmmhc.com/schemas/dto/membership-registration.json",
+  "title": "MembershipRegistrationDTO",
+  "type": "object",
+  "required": ["fullName", "email", "membershipType"],
+  "properties": {
+    "fullName": { "type": "string", "minLength": 1 },
+    "email": { "type": "string", "format": "email" },
+    "membershipType": {
+      "type": "string",
+      "enum": ["UBC_STUDENT", "NON_UBC_STUDENT", "NON_STUDENT"]
+    },
+    "studentId": { "type": "string" },
+    "instagram": { "type": "string" },
+    "instagramGroupchat": { "type": "boolean", "default": false },
+    "newsletterOptIn": { "type": "boolean", "default": false },
+    "paymentMethod": {
+      "type": "string",
+      "enum": ["STRIPE", "CASH", "ETRANSFER", "OTHER"],
+      "default": "STRIPE"
+    }
+  }
+}

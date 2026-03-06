@@ -1,0 +1,163 @@
+openapi: 3.0.3
+info:
+  title: Membership Service API
+  description: Membership registration, Stripe checkout, status, webhook
+  version: 1.0.0
+
+servers:
+  - url: /api/membership
+    description: Membership API base path
+
+paths:
+  /register:
+    post:
+      summary: Register membership and get Stripe checkout URL
+      operationId: registerMembership
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MembershipRegistrationDTO'
+      responses:
+        '200':
+          description: Checkout session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutSessionDTO'
+        '409':
+          description: Conflict (e.g. email already registered)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Payment service unavailable
+
+  /status:
+    get:
+      summary: Get current user's membership status
+      operationId: getMembershipStatus
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Membership details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipStatusResponse'
+        '401':
+          description: Unauthorized
+        '404':
+          description: No membership found
+
+  /check:
+    get:
+      summary: Check if email has active membership (public)
+      operationId: checkMembership
+      parameters:
+        - name: email
+          in: query
+          required: true
+          schema: { type: string, format: email }
+      responses:
+        '200':
+          description: Active status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  active: { type: boolean }
+
+  /my-status:
+    get:
+      summary: Get current user's membership status (summary)
+      operationId: getMyMembershipStatus
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: hasMembership, isPaid, membershipType, paymentStatus
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyMembershipStatusResponse'
+        '401':
+          description: Unauthorized
+
+  /retry-payment:
+    post:
+      summary: Create retry payment session for unpaid membership
+      operationId: retryPayment
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Checkout session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutSessionDTO'
+        '400':
+          description: Invalid request (e.g. no unpaid membership)
+        '401':
+          description: Unauthorized
+        '500':
+          description: Payment service unavailable
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    MembershipRegistrationDTO:
+      type: object
+      required: [fullName, email, membershipType]
+      properties:
+        fullName: { type: string }
+        email: { type: string, format: email }
+        membershipType:
+          type: string
+          enum: [UBC_STUDENT, NON_UBC_STUDENT, NON_STUDENT]
+        studentId: { type: string }
+        instagram: { type: string }
+        instagramGroupchat: { type: boolean, default: false }
+        newsletterOptIn: { type: boolean, default: false }
+        paymentMethod:
+          type: string
+          enum: [STRIPE, CASH, ETRANSFER, OTHER]
+          default: STRIPE
+
+    CheckoutSessionDTO:
+      type: object
+      required: [sessionId, sessionUrl]
+      properties:
+        sessionId: { type: string }
+        sessionUrl: { type: string, format: uri }
+
+    MembershipStatusResponse:
+      type: object
+      properties:
+        active: { type: boolean }
+        membershipType: { type: string }
+        endDate: { type: string }
+        verifiedAt: { type: string }
+
+    MyMembershipStatusResponse:
+      type: object
+      properties:
+        hasMembership: { type: boolean }
+        isPaid: { type: boolean }
+        membershipType: { type: string }
+        paymentStatus: { type: string }
+
+    ErrorResponse:
+      type: object
+      properties:
+        error: { type: string }
