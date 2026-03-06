@@ -1,0 +1,42 @@
+# Dev profile: use in-memory-friendly config.
+# For local dev without Redis, use profile "dev-no-redis" to skip rate limiting.
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: stripe-webhook
+          uri: ${BACKEND_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/stripe/webhook
+        - id: auth
+          uri: ${BACKEND_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/auth/**,/login/**,/oauth2/**
+        - id: user
+          uri: ${BACKEND_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/user/**
+        - id: membership
+          uri: ${BACKEND_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/membership/**
+        - id: newsletter
+          uri: ${BACKEND_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/newsletter/**
+        - id: admin-memberships
+          uri: ${BACKEND_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/admin/memberships/**
+        - id: admin-users
+          uri: ${BACKEND_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/admin/users/**
+        - id: blog
+          uri: ${BACKEND_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/blog/**
+        - id: backend
+          uri: ${BACKEND_URI:http://localhost:8081}
+          predicates:
+            - Path=/api/**,/error
