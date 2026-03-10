@@ -3,9 +3,9 @@ spring:
     import: optional:file:./local.properties
 
   datasource:
-    url: jdbc:postgresql://${RAILWAY_TCP_PROXY_DOMAIN:localhost}:${RAILWAY_TCP_PROXY_PORT:5432}/${POSTGRES_DB:site_db}?sslmode=${SSL_MODE:disable}
-    username: ${POSTGRES_USER:postgres}
-    password: ${POSTGRES_PASSWORD:postgres}
+    url: jdbc:postgresql://${PGHOST:localhost}:${PGPORT:5432}/${PGDATABASE:site_db}?sslmode=${SSL_MODE:disable}
+    username: ${PGUSER:postgres}
+    password: ${PGPASSWORD:postgres}
   jpa:
     hibernate:
       ddl-auto: validate

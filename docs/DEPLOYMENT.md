@@ -19,6 +19,26 @@ Frontend → Gateway (public) → Auth / User / Membership / Newsletter (interna
 
 ## 1. Railway Infrastructure
 
+### 1.0 Quick: Connect Database to Microservices
+
+Your monolith used one Postgres. After splitting into microservices, **each service needs the database variables**.
+
+1. **Add PostgreSQL** (if not already): Project Canvas → `+ New` → `Database` → `PostgreSQL`
+2. **Link Postgres to each app service:**
+   - Open **[Auth] Site-Back-End** → **Variables** → **+ New Variable**
+   - Add variable references (replace `Postgres` with your Postgres service name):
+     - `PGHOST` = `${{Postgres.PGHOST}}`
+     - `PGPORT` = `${{Postgres.PGPORT}}`
+     - `PGDATABASE` = `${{Postgres.PGDATABASE}}`
+     - `PGUSER` = `${{Postgres.PGUSER}}`
+     - `PGPASSWORD` = `${{Postgres.PGPASSWORD}}`
+     - `SSL_MODE` = `require`
+   - Repeat for **[User]**, **[Membership]**, **[Newsletter]** Site-Back-End services
+
+3. **Redeploy** each service after adding variables.
+
+---
+
 ### 1.1 Add Services (Project Canvas)
 
 | Service | Source | Notes |
@@ -72,20 +92,29 @@ Set once, share across services:
 | `INTERNAL_SERVICE_KEY` | (secret) | User, Membership |
 | `APPLICATION_PROFILE` | `prod` | All |
 
-### 2.2 PostgreSQL (Reference from Postgres Service)
+### 2.2 PostgreSQL – Connect Each Service to the Database
 
-For each app service (auth, user, membership, newsletter), add:
+**Step 1:** Add a PostgreSQL service to your project (`+ New` → `Database` → `PostgreSQL`).
 
-| Variable | Reference |
-|----------|-----------|
-| `RAILWAY_TCP_PROXY_DOMAIN` | `${{Postgres.PGHOST}}` |
-| `RAILWAY_TCP_PROXY_PORT` | `${{Postgres.PGPORT}}` |
-| `POSTGRES_DB` | `${{Postgres.PGDATABASE}}` |
-| `POSTGRES_USER` | `${{Postgres.PGUSER}}` |
-| `POSTGRES_PASSWORD` | `${{Postgres.PGPASSWORD}}` |
-| `SSL_MODE` | `require` |
+**Step 2:** For each app service (auth, user, membership, newsletter), add a **variable reference** to the Postgres service:
 
-> If your Postgres service uses different variable names, map accordingly.
+1. Open the app service (e.g. **[Auth] Site-Back-End**)
+2. Go to **Variables**
+3. Click **+ New Variable** (or **Add Variable Reference**)
+4. Add these variables, referencing your Postgres service (replace `Postgres` with your Postgres service name if different):
+
+| Variable   | Value (Reference)        |
+|-----------|---------------------------|
+| `PGHOST`  | `${{Postgres.PGHOST}}`    |
+| `PGPORT`  | `${{Postgres.PGPORT}}`   |
+| `PGDATABASE` | `${{Postgres.PGDATABASE}}` |
+| `PGUSER`  | `${{Postgres.PGUSER}}`   |
+| `PGPASSWORD` | `${{Postgres.PGPASSWORD}}` |
+| `SSL_MODE` | `require` (literal)      |
+
+**Alternative:** Use **Connect** (or **Add Reference**) in the service settings to link the Postgres service—Railway may inject `PGHOST`, `PGPORT`, etc. automatically. If so, you only need to add `SSL_MODE=require`.
+
+> All services can share the same Postgres instance. Railway creates one database by default; each service uses its own schema (Flyway tables are namespaced).
 
 ### 2.3 Redis (Gateway Only)
 

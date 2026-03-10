@@ -1,13 +1,16 @@
 spring:
-  flyway:
-    enabled: true
-    table: flyway_newsletter_schema_history
-    baseline-on-migrate: true
-    baseline-version: 999
   datasource:
     url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}?sslmode=${SSL_MODE:require}
     username: ${PGUSER}
     password: ${PGPASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    table: flyway_membership_schema_history
+    baseline-on-migrate: true
+    baseline-version: 999
   rabbitmq:
     host: ${RABBITMQ_HOST}
     port: ${RABBITMQ_PORT:5672}

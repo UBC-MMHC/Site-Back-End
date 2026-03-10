@@ -3,9 +3,10 @@ spring:
     import: optional:file:./local.properties
 
   datasource:
-    url: jdbc:postgresql://${RAILWAY_TCP_PROXY_DOMAIN}:${RAILWAY_TCP_PROXY_PORT}/${POSTGRES_DB}?sslmode=${SSL_MODE}
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
+    # Railway: use PGHOST, PGPORT, PGDATABASE from Postgres service reference
+    url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}?sslmode=${SSL_MODE:require}
+    username: ${PGUSER}
+    password: ${PGPASSWORD}
     hikari:
       maximum-pool-size: 4
       minimum-idle: 1
@@ -21,6 +22,9 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+    table: flyway_auth_schema_history
+    baseline-on-migrate: true
+    baseline-version: 999
 
   mail:
     sender_email: ${SMTP_SENDER_EMAIL}
