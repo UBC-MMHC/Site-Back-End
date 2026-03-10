@@ -45,17 +45,17 @@ Create **5 services** from this repo (one per app). Use **Root Directory** = rep
 - **Build Command**: `mvn -pl <module> -am clean package -DskipTests` (e.g. `mvn -pl gateway -am clean package -DskipTests`)
 - **Start Command**: See table above
 
-**Dockerfile configuration** (all services use multi-stage Dockerfiles; build context = repo root):
+**Dockerfile configuration** (each service uses its directory as build context):
 
-| Service | Dockerfile Path | Root Directory |
-|---------|-----------------|----------------|
-| `gateway` | `gateway/Dockerfile` | `/` (repo root) |
-| `auth-service` | `services/auth-service/Dockerfile` | `/` |
-| `user-service` | `services/user-service/Dockerfile` | `/` |
-| `membership-service` | `services/membership-service/Dockerfile` | `/` |
-| `newsletter-service` | `services/newsletter-service/Dockerfile` | `/` |
+| Service | Root Directory | Dockerfile Path |
+|---------|----------------|-----------------|
+| `gateway` | `gateway` | `Dockerfile` |
+| `auth-service` | `services/auth-service` | `Dockerfile` |
+| `user-service` | `services/user-service` | `Dockerfile` |
+| `membership-service` | `services/membership-service` | `Dockerfile` |
+| `newsletter-service` | `services/newsletter-service` | `Dockerfile` |
 
-Set **Root Directory** to repo root and **Dockerfile path** per service. Railway's build context is always the repo root, so the Dockerfiles will find all paths correctly.
+Set **Root Directory** to the service folder so the build context contains only that service's `pom.xml` and `src/`. The Dockerfile path is `Dockerfile` (relative to Root Directory).
 
 ---
 
@@ -219,9 +219,7 @@ Point the front-end to the **gateway** URL only. All API calls go through it.
 
 ## 6. Dockerfiles
 
-All services have multi-stage Dockerfiles that build the JAR inside the image (no dependency on external Maven build). This ensures consistent, reproducible builds regardless of Railway's build order or context.
-
-Set **Root Directory** = `/` and **Dockerfile path** per service (see table in §1.2).
+All services have multi-stage Dockerfiles that build the JAR inside the image. Each Dockerfile expects its **Root Directory** to be the service folder (e.g. `services/auth-service`), so the build context contains `pom.xml` and `src/`. See table in §1.2.
 
 ---
 

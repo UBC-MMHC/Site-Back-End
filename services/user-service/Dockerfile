@@ -1,18 +1,18 @@
-# Stage 1: Build the JAR (build context = repo root on Railway)
+# Build context = service directory (Root Directory: services/user-service)
 FROM eclipse-temurin:21-jdk-alpine AS builder
 WORKDIR /build
 
-COPY services/user-service/pom.xml services/user-service/
-RUN mvn -B -f services/user-service/pom.xml dependency:go-offline -DskipTests || true
+COPY pom.xml .
+RUN mvn -B -f pom.xml dependency:go-offline -DskipTests || true
 
-COPY services/user-service services/user-service
-RUN mvn -B -f services/user-service/pom.xml package -DskipTests
+COPY src src
+RUN mvn -B -f pom.xml package -DskipTests
 
 # Stage 2: Runtime image
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
-COPY --from=builder /build/services/user-service/target/user-service-*.jar app.jar
+COPY --from=builder /build/target/user-service-*.jar app.jar
 
 EXPOSE 8083
 
