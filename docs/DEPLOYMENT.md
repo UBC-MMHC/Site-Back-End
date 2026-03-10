@@ -45,7 +45,17 @@ Create **5 services** from this repo (one per app). Use **Root Directory** = rep
 - **Build Command**: `mvn -pl <module> -am clean package -DskipTests` (e.g. `mvn -pl gateway -am clean package -DskipTests`)
 - **Start Command**: See table above
 
-> **Note**: Only `membership-service` has a Dockerfile. Add Dockerfiles for the others for consistent builds, or rely on Railway's Nixpacks/Java detection.
+**Dockerfile configuration** (all services use multi-stage Dockerfiles; build context = repo root):
+
+| Service | Dockerfile Path | Root Directory |
+|---------|-----------------|----------------|
+| `gateway` | `gateway/Dockerfile` | `/` (repo root) |
+| `auth-service` | `services/auth-service/Dockerfile` | `/` |
+| `user-service` | `services/user-service/Dockerfile` | `/` |
+| `membership-service` | `services/membership-service/Dockerfile` | `/` |
+| `newsletter-service` | `services/newsletter-service/Dockerfile` | `/` |
+
+Set **Root Directory** to repo root and **Dockerfile path** per service. Railway's build context is always the repo root, so the Dockerfiles will find all paths correctly.
 
 ---
 
@@ -57,7 +67,7 @@ Set once, share across services:
 
 | Variable | Value | Used By |
 |----------|-------|---------|
-| `JWT_SECRET_TOKEN` | (secret) | Gateway, Auth |
+| `JWT_SECRET_TOKEN` | (secret, **min 32 chars** for HS256) | Gateway, Auth |
 | `FRONTEND_URL` | `https://your-frontend.vercel.app` | Gateway, Auth, Membership |
 | `INTERNAL_SERVICE_KEY` | (secret) | User, Membership |
 | `APPLICATION_PROFILE` | `prod` | All |
@@ -207,19 +217,11 @@ Point the front-end to the **gateway** URL only. All API calls go through it.
 
 ---
 
-## 6. Dockerfiles (Recommended)
+## 6. Dockerfiles
 
-Add Dockerfiles for gateway, auth, user, and newsletter (mirroring membership-service) for consistent builds. Example:
+All services have multi-stage Dockerfiles that build the JAR inside the image (no dependency on external Maven build). This ensures consistent, reproducible builds regardless of Railway's build order or context.
 
-```dockerfile
-FROM eclipse-temurin:21-jre-alpine
-WORKDIR /app
-COPY target/<artifact>-*.jar app.jar
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
-```
-
-Set **Dockerfile path** and **build context** per service in Railway.
+Set **Root Directory** = `/` and **Dockerfile path** per service (see table in §1.2).
 
 ---
 

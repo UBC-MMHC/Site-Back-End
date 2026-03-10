@@ -18,11 +18,21 @@ import java.util.function.Function;
 
 @Service
 public class JWTService {
+    private static final int MIN_SECRET_LENGTH = 32; // HS256 requires 256 bits
+
     private final SecretKey key;
     private final AppProperties appProperties;
 
     public JWTService(@Value("${spring.jwt.secret}") String secret, AppProperties appProperties) {
-        key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException(
+                "JWT_SECRET_TOKEN must be set and non-empty. Set it in Railway Shared Variables or environment.");
+        }
+        if (secret.getBytes(StandardCharsets.UTF_8).length < MIN_SECRET_LENGTH) {
+            throw new IllegalStateException(
+                "JWT_SECRET_TOKEN must be at least 32 characters for HS256. Current length: " + secret.length());
+        }
+        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.appProperties = appProperties;
     }
 
