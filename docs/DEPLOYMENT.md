@@ -23,17 +23,26 @@ Frontend → Gateway (public) → Auth / User / Membership / Newsletter (interna
 
 Your monolith used one Postgres. After splitting into microservices, **each service needs the database variables**.
 
-1. **Add PostgreSQL** (if not already): Project Canvas → `+ New` → `Database` → `PostgreSQL`
-2. **Link Postgres to each app service:**
-   - Open **[Auth] Site-Back-End** → **Variables** → **+ New Variable**
-   - Add variable references (replace `Postgres` with your Postgres service name):
-     - `PGHOST` = `${{Postgres.PGHOST}}`
-     - `PGPORT` = `${{Postgres.PGPORT}}`
-     - `PGDATABASE` = `${{Postgres.PGDATABASE}}`
-     - `PGUSER` = `${{Postgres.PGUSER}}`
-     - `PGPASSWORD` = `${{Postgres.PGPASSWORD}}`
-     - `SSL_MODE` = `require`
-   - Repeat for **[User]**, **[Membership]**, **[Newsletter]** Site-Back-End services
+**Option A – Single variable (recommended):** Add one variable per service:
+
+| Variable      | Value                      |
+|---------------|----------------------------|
+| `DATABASE_URL`| `${{Postgres.DATABASE_URL}}`|
+
+Replace `Postgres` with your Postgres service name. The app converts this to JDBC format automatically.
+
+**Option B – Individual variables:** Add these per service (replace `Postgres` with your service name):
+
+| Variable     | Value                    |
+|--------------|--------------------------|
+| `PGHOST`     | `${{Postgres.PGHOST}}`   |
+| `PGPORT`     | `${{Postgres.PGPORT}}`   |
+| `PGDATABASE` | `${{Postgres.PGDATABASE}}`|
+| `PGUSER`     | `${{Postgres.PGUSER}}`   |
+| `PGPASSWORD` | `${{Postgres.PGPASSWORD}}`|
+| `SSL_MODE`   | `require`                 |
+
+**Important:** Add these to each service’s **Variables** tab (Auth, User, Membership, Newsletter), not only as shared variables. Cross-service references like `${{Postgres.DATABASE_URL}}` must be set on each service that needs the database.
 
 3. **Redeploy** each service after adding variables.
 
