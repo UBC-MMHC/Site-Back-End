@@ -1,0 +1,30 @@
+openapi: 3.0.3
+info:
+  title: Stripe Webhook API
+  description: Stripe webhook handler (routed to Membership Service). No JWT required.
+  version: 1.0.0
+
+servers:
+  - url: /api/stripe
+    description: Stripe API base path
+
+paths:
+  /webhook:
+    post:
+      summary: Handle Stripe webhook events
+      operationId: handleWebhook
+      description: |
+        Processes checkout.session.completed and other Stripe events.
+        Uses Event Retrieval API for verification when proxy modifies payload.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Raw Stripe event payload
+      responses:
+        '200':
+          description: Event received and processed
+        '400':
+          description: Invalid payload or event

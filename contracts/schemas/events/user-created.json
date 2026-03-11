@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "UserCreated",
+  "description": "CloudEvents event published when a user is created (registration)",
+  "type": "object",
+  "required": ["specversion", "type", "source", "data"],
+  "properties": {
+    "specversion": { "type": "string", "const": "1.0" },
+    "type": { "type": "string", "const": "com.ubcmmhc.user.created" },
+    "source": { "type": "string", "const": "/auth-service" },
+    "data": {
+      "type": "object",
+      "required": ["userId", "email"],
+      "properties": {
+        "userId": { "type": "string", "format": "uuid" },
+        "email": { "type": "string", "format": "email" },
+        "name": { "type": "string" }
+      }
+    }
+  }
+}

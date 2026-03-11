@@ -1,0 +1,153 @@
+openapi: 3.0.3
+info:
+  title: Auth Service API
+  description: User identity, JWT issuance, OAuth2, password reset, verification tokens
+  version: 1.0.0
+
+servers:
+  - url: /api/auth
+    description: Auth API base path
+
+paths:
+  /register-user:
+    post:
+      summary: Register a new user
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDTO'
+      responses:
+        '200':
+          description: Registration successful
+        '400':
+          description: Invalid request
+
+  /login-user:
+    post:
+      summary: Login with email and password
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDTO'
+      responses:
+        '200':
+          description: Login successful; JWT set in HTTP-only cookie
+        '401':
+          description: Invalid credentials
+
+  /forgot-password:
+    post:
+      summary: Request password reset email
+      operationId: forgotPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordDTO'
+      responses:
+        '200':
+          description: Reset email sent (or no-op if email not found)
+
+  /reset-password:
+    post:
+      summary: Reset password with token
+      operationId: resetPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordDTO'
+      responses:
+        '200':
+          description: Password reset successful
+        '400':
+          description: Invalid or expired token
+
+  /logout:
+    post:
+      summary: Logout and clear JWT cookie
+      operationId: logout
+      responses:
+        '200':
+          description: Logged out successfully
+
+  /set-token:
+    post:
+      summary: Set JWT token as HTTP-only cookie (OAuth2 redirect flow)
+      operationId: setToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token:
+                  type: string
+                  description: JWT token from OAuth2 redirect
+      responses:
+        '200':
+          description: Cookie set successfully
+        '400':
+          description: Token is required
+
+  /me:
+    get:
+      summary: Get current authenticated user info
+      operationId: getCurrentUser
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  email:
+                    type: string
+                    format: email
+                  newsletterSubscription:
+                    type: boolean
+        '401':
+          description: Unauthorized
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: JWT
+
+  schemas:
+    LoginDTO:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+    ForgotPasswordDTO:
+      type: object
+      required: [email]
+      properties:
+        email: { type: string, format: email }
+    ResetPasswordDTO:
+      type: object
+      required: [token, newPassword]
+      properties:
+        token: { type: string }
+        newPassword: { type: string }

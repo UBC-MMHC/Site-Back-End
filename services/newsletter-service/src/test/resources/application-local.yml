@@ -1,0 +1,20 @@
+# Test profile: H2 in-memory, no RabbitMQ
+spring:
+  datasource:
+    url: jdbc:h2:mem:newsletter_test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+
+brevo:
+  base-url: https://api.brevo.com
+  api-key: test-key
+  newsletter-list-id: 1

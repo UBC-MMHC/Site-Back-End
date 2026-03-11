@@ -1,5 +1,7 @@
 HELP.md
 target/
+.DS_Store
+ddl_User.sql
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
@@ -33,3 +35,4 @@ build/
 .vscode/
 
 src/main/resources/local.properties
+/.cursor

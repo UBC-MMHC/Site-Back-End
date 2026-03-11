@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ubcmmhc.com/schemas/dto/checkout-session.json",
+  "title": "CheckoutSessionDTO",
+  "description": "Stripe checkout session URL for frontend redirect",
+  "type": "object",
+  "required": ["sessionId", "sessionUrl"],
+  "properties": {
+    "sessionId": { "type": "string" },
+    "sessionUrl": { "type": "string", "format": "uri" }
+  }
+}
