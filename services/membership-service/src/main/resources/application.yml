@@ -10,6 +10,9 @@ server:
 
 app:
   frontend-url: ${FRONTEND_URL}
+  user-service:
+    url: ${USER_SERVICE_URL:http://localhost:8083}
+    internal-key: ${INTERNAL_SERVICE_KEY:}
 
 stripe:
   secret-key: ${STRIPE_SECRET_KEY}
@@ -18,11 +21,6 @@ stripe:
     ubc-student: ${STRIPE_PRICE_UBC_STUDENT}
     non-ubc-student: ${STRIPE_PRICE_NON_UBC_STUDENT}
     non-student: ${STRIPE_PRICE_NON_STUDENT}
-
-app:
-  user-service:
-    url: ${USER_SERVICE_URL:http://localhost:8083}
-    internal-key: ${INTERNAL_SERVICE_KEY:}
 
 membership:
   events:
