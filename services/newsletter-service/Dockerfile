@@ -8,8 +8,8 @@ RUN mvn -B -f pom.xml dependency:go-offline -DskipTests || true
 COPY src src
 RUN mvn -B -f pom.xml package -DskipTests
 
-# Stage 2: Runtime image
-FROM eclipse-temurin:21-jre-alpine
+# Stage 2: Runtime image (non-Alpine for Railway private networking DNS compatibility)
+FROM eclipse-temurin:21-jre
 WORKDIR /app
 
 COPY --from=builder /build/target/newsletter-service-*.jar app.jar
