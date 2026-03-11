@@ -40,13 +40,13 @@ Spring Cloud Gateway serving as the single entry point for the UBC MMHC backend.
 docker compose up -d redis postgres rabbitmq
 
 # Start each service (in separate terminals)
-cd services/auth-service && ./mvnw spring-boot:run -Dspring-boot.run.arguments="--server.port=8082"
-cd services/user-service && ./mvnw spring-boot:run -Dspring-boot.run.arguments="--server.port=8083"
-cd services/membership-service && ./mvnw spring-boot:run -Dspring-boot.run.arguments="--server.port=8084"
-cd services/newsletter-service && ./mvnw spring-boot:run -Dspring-boot.run.arguments="--server.port=8085"
+cd services/auth-service && mvn spring-boot:run -Dspring-boot.run.arguments="--server.port=8082"
+cd services/user-service && mvn spring-boot:run -Dspring-boot.run.arguments="--server.port=8083"
+cd services/membership-service && mvn spring-boot:run -Dspring-boot.run.arguments="--server.port=8084"
+cd services/newsletter-service && mvn spring-boot:run -Dspring-boot.run.arguments="--server.port=8085"
 
 # Start gateway
-cd gateway && ./mvnw spring-boot:run
+cd gateway && mvn spring-boot:run
 ```
 
 ### Without Redis (dev profile)
@@ -54,7 +54,7 @@ cd gateway && ./mvnw spring-boot:run
 The `dev` profile (default) omits rate limiting, so Redis is optional for local development:
 
 ```bash
-./mvnw spring-boot:run
+cd gateway && mvn spring-boot:run
 ```
 
 ## Route Mapping

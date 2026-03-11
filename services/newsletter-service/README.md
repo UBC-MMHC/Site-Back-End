@@ -32,7 +32,7 @@ Set `NEWSLETTER_SERVICE_URI=http://localhost:8085` (or `http://newsletter-servic
 
 1. Start infrastructure:
    ```bash
-   docker compose up -d postgres-newsletter rabbitmq
+   docker compose up -d redis postgres rabbitmq
    ```
 
 2. Run the service:

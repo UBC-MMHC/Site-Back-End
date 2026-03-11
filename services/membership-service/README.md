@@ -34,7 +34,7 @@ Publishes `MembershipCreated` (CloudEvents format) to RabbitMQ when a membership
 
 ## Run Locally
 
-1. Start infra: `docker compose up -d redis postgres-auth postgres-membership rabbitmq`
+1. Start infra: `docker compose up -d redis postgres rabbitmq`
 2. Build: `mvn -f services/membership-service/pom.xml package`
 3. Run: `MEMBERSHIP_SERVICE_PORT=8084 java -jar services/membership-service/target/membership-service-*.jar`
 

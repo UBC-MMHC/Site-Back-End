@@ -7,5 +7,4 @@
 # Ignore documentation and local config
 README.md
 .git
-node_modules
 .idea/

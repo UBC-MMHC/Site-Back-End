@@ -14,7 +14,7 @@ User profile, roles, newsletter subscription flag. Extracted in Phase 2.2.
 
 ## Local Development
 
-1. Start infrastructure: `docker compose up -d redis postgres-auth`
+1. Start infrastructure: `docker compose up -d redis postgres rabbitmq`
 2. Run auth-service first (owns schema, runs migrations).
 3. Run user-service: `cd services/user-service && mvn spring-boot:run`
 4. Set `USER_SERVICE_URI=http://localhost:8083` when starting the gateway.
