@@ -66,9 +66,11 @@ spring:
 
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
+      url: ${REDIS_URL:}
+      host: ${REDISHOST:${REDIS_HOST:localhost}}
+      port: ${REDISPORT:${REDIS_PORT:6379}}
+      password: ${REDISPASSWORD:${REDIS_PASSWORD:}}
+      username: ${REDISUSER:${REDIS_USER:default}}
 
 app:
   frontend-url: ${FRONTEND_URL:http://localhost:3000}
