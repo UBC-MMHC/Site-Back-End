@@ -44,6 +44,7 @@ public class JwtClaimForwardingGlobalFilter implements GlobalFilter, Ordered {
 
     private static final List<PathMatcher> PROTECTED_PATHS = List.of(
             path -> path.startsWith("/api/user/"),
+            path -> path.startsWith("/api/membership/status"),
             path -> path.startsWith("/api/membership/my-status"),
             path -> path.startsWith("/api/membership/retry-payment"),
             path -> path.startsWith("/api/admin/"),
