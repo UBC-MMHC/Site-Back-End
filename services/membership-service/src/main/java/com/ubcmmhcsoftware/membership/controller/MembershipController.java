@@ -43,8 +43,7 @@ public class MembershipController {
             return ResponseEntity.ok(sessionDTO);
         } catch (IllegalStateException e) {
             log.warn("Registration failed: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of("error", e.getMessage()));
+            return registrationErrorResponse(e);
         } catch (StripeException e) {
             log.error("Stripe error during registration: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -119,5 +118,20 @@ public class MembershipController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Payment service unavailable. Please try again."));
         }
+    }
+
+    private ResponseEntity<Map<String, String>> registrationErrorResponse(IllegalStateException e) {
+        String message = e.getMessage() != null ? e.getMessage() : "Registration failed";
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        if (message.contains("temporarily unavailable")) {
+            status = HttpStatus.SERVICE_UNAVAILABLE;
+        } else if (message.contains("already exists")) {
+            status = HttpStatus.CONFLICT;
+        } else if (message.contains("User not found")) {
+            status = HttpStatus.UNAUTHORIZED;
+        }
+
+        return ResponseEntity.status(status).body(Map.of("error", message));
     }
 }
