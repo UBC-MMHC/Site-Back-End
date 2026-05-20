@@ -1,5 +1,5 @@
-# Production: omit Redis rate limiting unless REDIS_URL / REDISPASSWORD are configured.
-# Railway Redis requires authentication; missing password causes NOAUTH and breaks /api/membership/**.
+# Production gateway route configuration.
+# Redis-backed rate limiting is not configured in this profile.
 spring:
   cloud:
     gateway:
