@@ -30,6 +30,13 @@ Spring Cloud Gateway serving as the single entry point for the UBC MMHC backend.
 | `REDIS_HOST` | Redis host for rate limiting | `localhost` |
 | `REDIS_PORT` | Redis port | `6379` |
 | `REDIS_PASSWORD` | Redis password | (empty) |
+| `APPLICATION_PROFILE` | Active profile (`dev` omits rate limiting; `prod` omits rate limiting until Redis auth is configured) | `dev` |
+
+### Railway Redis
+
+If the gateway uses the default profile with rate limiting (not `dev`/`prod`), set Redis credentials on the **gateway** service from your Railway Redis plugin, for example `REDISPASSWORD` or `REDIS_PASSWORD`. Without them you will see `NOAUTH` errors and `/api/membership/**` requests can fail when logged in.
+
+The `prod` profile disables rate limiting so membership works without Redis; re-enable limiting after Redis env vars are set.
 
 ## Running Locally
 

@@ -45,7 +45,9 @@ public class JWTService {
                 .type("JWT")
                 .and()
                 .subject(userDetails.getId().toString())
-                .claim("email", userDetails.getUsername())
+                .claim("email", userDetails.getUsername() != null
+                        ? userDetails.getUsername().trim().toLowerCase()
+                        : null)
                 .claim("roles", userDetails.getAuthorities()
                         .stream()
                         .map(GrantedAuthority::getAuthority)

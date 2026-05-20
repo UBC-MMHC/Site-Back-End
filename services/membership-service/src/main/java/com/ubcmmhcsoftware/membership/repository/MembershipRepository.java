@@ -11,15 +11,15 @@ import java.util.UUID;
 @Repository
 public interface MembershipRepository extends JpaRepository<Membership, UUID> {
 
-    Optional<Membership> findByEmail(String email);
+    Optional<Membership> findByEmailIgnoreCase(String email);
+
+    boolean existsByEmailIgnoreCase(String email);
 
     Optional<Membership> findByStripeCustomerId(String stripeCustomerId);
 
     Optional<Membership> findByStripeSubscriptionId(String subscriptionId);
 
     Optional<Membership> findByStripeSessionId(String sessionId);
-
-    boolean existsByEmail(String email);
 
     List<Membership> findByActiveAndPaymentStatus(boolean active, String paymentStatus);
 }

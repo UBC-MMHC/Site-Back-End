@@ -36,8 +36,11 @@ public class MembershipService {
         if (userId != null && !userServiceClient.userExists(userId)) {
             throw new IllegalStateException("User not found. Please log in again.");
         }
-        if (membershipRepository.existsByEmail(dto.getEmail())) {
-            throw new IllegalStateException("A membership already exists for this email");
+
+        String email = normalizeEmail(dto.getEmail());
+        Optional<Membership> existing = membershipRepository.findByEmailIgnoreCase(email);
+        if (existing.isPresent()) {
+            return resumeUnpaidMembership(existing.get(), dto, userId, email);
         }
 
         PaymentMethod paymentMethod = dto.getPaymentMethod() != null ? dto.getPaymentMethod() : PaymentMethod.STRIPE;
@@ -45,7 +48,7 @@ public class MembershipService {
         Membership membership = Membership.builder()
                 .userId(userId)
                 .fullName(dto.getFullName())
-                .email(dto.getEmail())
+                .email(email)
                 .membershipType(dto.getMembershipType())
                 .studentId(dto.getStudentId())
                 .instagram(dto.getInstagram())
@@ -58,16 +61,52 @@ public class MembershipService {
 
         membership = membershipRepository.save(membership);
         log.info("Created pending membership {} for {} with payment method {}",
-                membership.getId(), dto.getEmail(), paymentMethod);
+                membership.getId(), email, paymentMethod);
 
         if (dto.isNewsletterOptIn()) {
             eventPublisher.publishMembershipCreated(MembershipCreatedEvent.builder()
                     .membershipId(membership.getId())
-                    .email(dto.getEmail())
+                    .email(email)
                     .newsletterOptIn(true)
                     .build());
         }
 
+        return completeRegistration(membership, paymentMethod);
+    }
+
+    private CheckoutSessionDTO resumeUnpaidMembership(Membership membership,
+                                                      MembershipRegistrationDTO dto,
+                                                      UUID userId,
+                                                      String email) throws StripeException {
+        if (membership.isActive()) {
+            throw new IllegalStateException("A membership already exists for this email");
+        }
+        if (userId != null && membership.getUserId() != null && !membership.getUserId().equals(userId)) {
+            throw new IllegalStateException("A membership already exists for this email");
+        }
+
+        if (userId != null && membership.getUserId() == null) {
+            membership.setUserId(userId);
+        }
+
+        membership.setFullName(dto.getFullName());
+        membership.setEmail(email);
+        membership.setMembershipType(dto.getMembershipType());
+        membership.setStudentId(dto.getStudentId());
+        membership.setInstagram(dto.getInstagram());
+        membership.setInstagramGroupchat(dto.isInstagramGroupchat());
+        membership.setNewsletterOptIn(dto.isNewsletterOptIn());
+
+        PaymentMethod paymentMethod = dto.getPaymentMethod() != null ? dto.getPaymentMethod() : PaymentMethod.STRIPE;
+        membership.setPaymentMethod(paymentMethod);
+        membership = membershipRepository.save(membership);
+
+        log.info("Resuming unpaid membership {} for {}", membership.getId(), email);
+        return completeRegistration(membership, paymentMethod);
+    }
+
+    private CheckoutSessionDTO completeRegistration(Membership membership,
+                                                    PaymentMethod paymentMethod) throws StripeException {
         if (paymentMethod == PaymentMethod.STRIPE) {
             Session session = stripeService.createCheckoutSession(membership);
 
@@ -86,6 +125,10 @@ public class MembershipService {
                 .sessionId(null)
                 .sessionUrl(null)
                 .build();
+    }
+
+    private static String normalizeEmail(String email) {
+        return email == null ? "" : email.trim().toLowerCase();
     }
 
     @Transactional
@@ -128,18 +171,18 @@ public class MembershipService {
     }
 
     public Optional<Membership> getMembershipByEmail(String email) {
-        return membershipRepository.findByEmail(email);
+        return membershipRepository.findByEmailIgnoreCase(normalizeEmail(email));
     }
 
     public boolean hasActiveMembership(String email) {
-        return membershipRepository.findByEmail(email)
+        return membershipRepository.findByEmailIgnoreCase(normalizeEmail(email))
                 .map(Membership::isActive)
                 .orElse(false);
     }
 
     @Transactional
     public CheckoutSessionDTO createRetryPaymentSession(String email) throws StripeException {
-        Membership membership = membershipRepository.findByEmail(email)
+        Membership membership = membershipRepository.findByEmailIgnoreCase(normalizeEmail(email))
                 .orElseThrow(() -> new IllegalStateException("No membership found for this email"));
 
         if (membership.isActive()) {
@@ -161,7 +204,7 @@ public class MembershipService {
 
     @Transactional
     public void manuallyApproveMembership(String memberEmail, PaymentMethod paymentMethod, String adminEmail) {
-        Membership membership = membershipRepository.findByEmail(memberEmail)
+        Membership membership = membershipRepository.findByEmailIgnoreCase(normalizeEmail(memberEmail))
                 .orElseThrow(() -> new IllegalStateException("No membership found for email: " + memberEmail));
 
         if (membership.isActive()) {
