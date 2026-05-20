@@ -13,6 +13,8 @@ public interface MembershipRepository extends JpaRepository<Membership, UUID> {
 
     Optional<Membership> findByEmailIgnoreCase(String email);
 
+    List<Membership> findAllByEmailIgnoreCase(String email);
+
     boolean existsByEmailIgnoreCase(String email);
 
     Optional<Membership> findByStripeCustomerId(String stripeCustomerId);

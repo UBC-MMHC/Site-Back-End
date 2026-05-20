@@ -38,9 +38,20 @@ public class MembershipService {
         }
 
         String email = normalizeEmail(dto.getEmail());
-        Optional<Membership> existing = membershipRepository.findByEmailIgnoreCase(email);
-        if (existing.isPresent()) {
-            return resumeUnpaidMembership(existing.get(), dto, userId, email);
+        List<Membership> matches = membershipRepository.findAllByEmailIgnoreCase(email);
+        if (!matches.isEmpty()) {
+            Membership toResume;
+            if (matches.size() == 1) {
+                toResume = matches.get(0);
+            } else {
+                List<Membership> active = matches.stream().filter(Membership::isActive).toList();
+                if (active.size() == 1) {
+                    toResume = active.get(0);
+                } else {
+                    throw new IllegalStateException("A membership already exists for this email");
+                }
+            }
+            return resumeUnpaidMembership(toResume, dto, userId, email);
         }
 
         PaymentMethod paymentMethod = dto.getPaymentMethod() != null ? dto.getPaymentMethod() : PaymentMethod.STRIPE;
