@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Locale;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -89,6 +90,8 @@ public class MembershipService {
                                                       MembershipRegistrationDTO dto,
                                                       UUID userId,
                                                       String email) throws StripeException {
+        boolean previouslyNewsletterOptedIn = membership.isNewsletterOptIn();
+
         if (membership.isActive()) {
             throw new IllegalStateException("A membership already exists for this email");
         }
@@ -111,6 +114,14 @@ public class MembershipService {
         PaymentMethod paymentMethod = dto.getPaymentMethod() != null ? dto.getPaymentMethod() : PaymentMethod.STRIPE;
         membership.setPaymentMethod(paymentMethod);
         membership = membershipRepository.save(membership);
+
+        if (!previouslyNewsletterOptedIn && dto.isNewsletterOptIn()) {
+            eventPublisher.publishMembershipCreated(MembershipCreatedEvent.builder()
+                    .membershipId(membership.getId())
+                    .email(email)
+                    .newsletterOptIn(true)
+                    .build());
+        }
 
         log.info("Resuming unpaid membership {} for {}", membership.getId(), email);
         return completeRegistration(membership, paymentMethod);
@@ -139,7 +150,7 @@ public class MembershipService {
     }
 
     private static String normalizeEmail(String email) {
-        return email == null ? "" : email.trim().toLowerCase();
+        return email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
     }
 
     @Transactional

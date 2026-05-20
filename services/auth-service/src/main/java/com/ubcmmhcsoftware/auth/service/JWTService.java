@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Function;
 
 @Service
@@ -46,7 +47,7 @@ public class JWTService {
                 .and()
                 .subject(userDetails.getId().toString())
                 .claim("email", userDetails.getUsername() != null
-                        ? userDetails.getUsername().trim().toLowerCase()
+                        ? userDetails.getUsername().trim().toLowerCase(Locale.ROOT)
                         : null)
                 .claim("roles", userDetails.getAuthorities()
                         .stream()
