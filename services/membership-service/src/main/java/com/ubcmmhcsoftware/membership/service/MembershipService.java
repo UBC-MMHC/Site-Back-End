@@ -45,11 +45,11 @@ public class MembershipService {
             if (matches.size() == 1) {
                 toResume = matches.get(0);
             } else {
-                List<Membership> active = matches.stream().filter(Membership::isActive).toList();
-                if (active.size() == 1) {
-                    toResume = active.get(0);
+                List<Membership> activeMemberships = matches.stream().filter(Membership::isActive).toList();
+                if (activeMemberships.size() == 1) {
+                    toResume = activeMemberships.get(0);
                 } else {
-                    throw new IllegalStateException("A membership already exists for this email");
+                    throw new IllegalStateException("Multiple memberships found for this email; please contact support");
                 }
             }
             return resumeUnpaidMembership(toResume, dto, userId, email);
