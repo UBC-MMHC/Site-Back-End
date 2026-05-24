@@ -11,6 +11,7 @@ User profile, roles, newsletter subscription flag. Extracted in Phase 2.2.
 - **Database**: Shares `auth_db` with Auth Service (same `mmhc_user`, `role`, `user_role` tables).
 - **Port**: `USER_SERVICE_PORT` (default 8083).
 - **Gateway**: Set `USER_SERVICE_URI=http://localhost:8083` (or `http://user-service:8083` in Docker) to route `/api/user/**` from the gateway to this service.
+- **Internal API**: Set `INTERNAL_SERVICE_KEY` (same value on membership-service as `app.user-service.internal-key`). Used by membership-service to call `GET /api/user/internal/exists/{userId}`. If unset, internal endpoints return **503**.
 
 ## Local Development
 

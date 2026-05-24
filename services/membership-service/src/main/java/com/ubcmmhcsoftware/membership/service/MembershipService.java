@@ -34,8 +34,9 @@ public class MembershipService {
 
     @Transactional
     public CheckoutSessionDTO createMembership(MembershipRegistrationDTO dto, UUID userId) throws StripeException {
-        if (userId != null && !userServiceClient.userExists(userId)) {
-            throw new IllegalStateException("User not found. Please log in again.");
+        // userId comes from a gateway-validated JWT; user-service lookup is best-effort only
+        if (userId != null) {
+            verifyUserIfAvailable(userId);
         }
 
         String email = normalizeEmail(dto.getEmail());
@@ -147,6 +148,17 @@ public class MembershipService {
                 .sessionId(null)
                 .sessionUrl(null)
                 .build();
+    }
+
+    private void verifyUserIfAvailable(UUID userId) {
+        try {
+            if (!userServiceClient.userExists(userId)) {
+                log.warn("User {} not found in user-service; continuing with JWT-linked registration", userId);
+            }
+        } catch (Exception e) {
+            log.warn("Could not reach user-service for userId {} ({}); continuing with JWT-linked registration",
+                    userId, e.getMessage());
+        }
     }
 
     private static String normalizeEmail(String email) {
