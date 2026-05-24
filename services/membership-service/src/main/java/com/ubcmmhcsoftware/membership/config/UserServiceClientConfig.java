@@ -16,7 +16,7 @@ import java.time.Duration;
 @Configuration
 public class UserServiceClientConfig {
 
-    @Value("${app.user-service.url:http://localhost:8082}")
+    @Value("${app.user-service.url:http://localhost:8083}")
     private String userServiceUrl;
 
     @Bean

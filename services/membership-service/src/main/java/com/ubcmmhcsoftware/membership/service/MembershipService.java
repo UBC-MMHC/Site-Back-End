@@ -33,9 +33,14 @@ public class MembershipService {
     private final UserServiceClient userServiceClient;
 
     @Transactional
-    public CheckoutSessionDTO createMembership(MembershipRegistrationDTO dto, UUID userId) throws StripeException {
-        if (userId != null && !userServiceClient.userExists(userId)) {
-            throw new IllegalStateException("User not found. Please log in again.");
+    public CheckoutSessionDTO createMembership(MembershipRegistrationDTO dto, UUID userId, String authenticatedEmail)
+            throws StripeException {
+        String email = normalizeEmail(dto.getEmail());
+        requireAuthenticatedEmailMatch(userId, authenticatedEmail, email);
+
+        // userId comes from a gateway-validated JWT; user-service lookup is best-effort only
+        if (userId != null) {
+            verifyUserIfAvailable(userId);
         }
 
         String email = normalizeEmail(dto.getEmail());

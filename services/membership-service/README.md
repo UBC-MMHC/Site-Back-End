@@ -42,3 +42,5 @@ Publishes `MembershipCreated` (CloudEvents format) to RabbitMQ when a membership
 
 - `MEMBERSHIP_SERVICE_PORT` (default 8084)
 - `FRONTEND_URL`, `STRIPE_*`, `POSTGRES_*`, `RABBITMQ_*`
+- `USER_SERVICE_URL` — **required in production** (e.g. `http://user-service.railway.internal:8083`). Defaults to `http://localhost:8083`. When logged in, register attempts a best-effort user-service exists check; if this points at `localhost` inside Railway or is otherwise unreachable, the check is skipped/logged and registration continues.
+- `INTERNAL_SERVICE_KEY` — shared secret with user-service for `/api/user/internal/exists/{userId}`. Must match user-service’s `INTERNAL_SERVICE_KEY`. If missing or invalid on user-service, that internal exists check may fail (for example with **503**), and membership-service logs/skips the verification rather than failing registration.
