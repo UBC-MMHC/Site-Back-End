@@ -31,7 +31,9 @@ public class MembershipController {
     public ResponseEntity<?> registerMembership(@Valid @RequestBody MembershipRegistrationDTO dto,
                                                 @AuthenticationPrincipal UserDetails userDetails) {
         UUID userId = null;
+        String authenticatedEmail = null;
         if (userDetails instanceof GatewayUser gu) {
+            authenticatedEmail = gu.getUsername();
             try {
                 userId = gu.userId() != null ? UUID.fromString(gu.userId()) : null;
             } catch (IllegalArgumentException ignored) {
@@ -39,7 +41,7 @@ public class MembershipController {
         }
 
         try {
-            CheckoutSessionDTO sessionDTO = membershipService.createMembership(dto, userId);
+            CheckoutSessionDTO sessionDTO = membershipService.createMembership(dto, userId, authenticatedEmail);
             return ResponseEntity.ok(sessionDTO);
         } catch (IllegalStateException e) {
             log.warn("Registration failed: {}", e.getMessage());
@@ -130,6 +132,8 @@ public class MembershipController {
             status = HttpStatus.CONFLICT;
         } else if (message.contains("User not found")) {
             status = HttpStatus.UNAUTHORIZED;
+        } else if (message.contains("must match your account email")) {
+            status = HttpStatus.FORBIDDEN;
         }
 
         return ResponseEntity.status(status).body(Map.of("error", message));
