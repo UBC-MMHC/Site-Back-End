@@ -43,6 +43,7 @@ public class MembershipService {
             verifyUserIfAvailable(userId);
         }
 
+        String email = normalizeEmail(dto.getEmail());
         List<Membership> matches = membershipRepository.findAllByEmailIgnoreCase(email);
         if (!matches.isEmpty()) {
             Membership toResume;
@@ -99,9 +100,6 @@ public class MembershipService {
         if (membership.isActive()) {
             throw new IllegalStateException("A membership already exists for this email");
         }
-        if (userId != null && !email.equals(normalizeEmail(membership.getEmail()))) {
-            throw new IllegalStateException("Registration email must match your account email");
-        }
         if (userId != null && membership.getUserId() != null && !membership.getUserId().equals(userId)) {
             throw new IllegalStateException("A membership already exists for this email");
         }
@@ -154,29 +152,6 @@ public class MembershipService {
                 .sessionId(null)
                 .sessionUrl(null)
                 .build();
-    }
-
-    private void requireAuthenticatedEmailMatch(UUID userId, String authenticatedEmail, String registrationEmail) {
-        if (userId == null) {
-            return;
-        }
-        if (authenticatedEmail == null || authenticatedEmail.isBlank()) {
-            throw new IllegalStateException("User not found. Please log in again.");
-        }
-        if (!registrationEmail.equals(normalizeEmail(authenticatedEmail))) {
-            throw new IllegalStateException("Registration email must match your account email");
-        }
-    }
-
-    private void verifyUserIfAvailable(UUID userId) {
-        try {
-            if (!userServiceClient.userExists(userId)) {
-                log.warn("User {} not found in user-service; continuing with JWT-linked registration", userId);
-            }
-        } catch (Exception e) {
-            log.warn("Could not reach user-service for userId {} ({}); continuing with JWT-linked registration",
-                    userId, e.getMessage());
-        }
     }
 
     private static String normalizeEmail(String email) {
