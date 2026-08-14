@@ -1,0 +1,46 @@
+# In-memory H2 for tests and `local` profile. Hibernate creates schema; RoleSeeder inserts roles.
+spring:
+  datasource:
+    url: jdbc:h2:mem:site_db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false
+  jwt:
+    secret: test-secret-at-least-32-characters-long-for-hs256
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: test-client-id
+            client-secret: test-client-secret
+
+app:
+  frontend-url: http://localhost:3000
+  jwt-cookie:
+    secure: false
+    same-site: Lax
+
+brevo:
+  api-key: test-key
+  newsletter-list-id: 1
+  base-url: http://127.0.0.1:9
+
+stripe:
+  secret-key: sk_test_dummy
+  webhook-secret: whsec_dummy
+  prices:
+    ubc-student: price_dummy
+    non-ubc-student: price_dummy
+    non-student: price_dummy
+
+spring.mail.sender_email: test@example.com
