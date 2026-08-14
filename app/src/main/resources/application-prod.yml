@@ -1,10 +1,7 @@
 # Railway Postgres. Tables already exist from the microservice Flyway histories.
-# New history table; baseline 5 so V1–V5 are not replayed.
+# JDBC URL/user/password are set by RailwayDatabaseConfig from DATABASE_URL or PG*.
 spring:
   datasource:
-    url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}?sslmode=${SSL_MODE:require}
-    username: ${PGUSER}
-    password: ${PGPASSWORD}
     hikari:
       maximum-pool-size: 10
       minimum-idle: 2
@@ -22,5 +19,5 @@ spring:
     table: flyway_schema_history
     baseline-on-migrate: true
     baseline-version: 5
-
-spring.mail.sender_email: ${SMTP_SENDER_EMAIL}
+  mail:
+    sender_email: ${SMTP_SENDER_EMAIL:noreply@example.com}
