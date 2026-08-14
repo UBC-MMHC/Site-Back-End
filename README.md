@@ -36,6 +36,12 @@ mvn test
 
 GitHub Actions runs `mvn -B test` on every push (`.github/workflows/test.yml`).
 
-Railway cutover: deploy this image onto the current **gateway** service so the public hostname, Stripe webhook, and Google redirect URI stay the same. Then delete the old auth/user/membership/newsletter/Redis/RabbitMQ services.
+## Railway (Railpack)
+
+Point the backend service at branch `feat/modular-monolith` (or `main` after merge). Root Directory must be the repo root, not `gateway` or `services/...`. `main` still has the old microservices tree and no root `pom.xml`, so Railpack cannot detect Java.
+
+`railpack.json` builds the `app` module and starts `target/app.jar` on `$PORT`.
+
+Cutover: deploy onto the current **gateway** service so the public hostname, Stripe webhook, and Google redirect URI stay the same. Then delete the old auth/user/membership/newsletter/Redis/RabbitMQ services.
 
 Production Flyway uses table `flyway_schema_history` and `baseline-version: 5`. Do not replay V1–V5 against the existing Railway database; those tables already exist from `flyway_auth_schema_history`, `flyway_membership_schema_history`, and `flyway_newsletter_schema_history`.
