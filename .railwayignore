@@ -1,0 +1,7 @@
+.git
+.idea
+.github
+target
+app/target
+*.iml
+.DS_Store

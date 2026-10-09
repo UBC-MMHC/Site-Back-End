@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: site-app
+  profiles:
+    active: ${APPLICATION_PROFILE:dev}
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            clientId: ${GOOGLE_CLIENT_ID:test-client-id}
+            clientSecret: ${GOOGLE_CLIENT_SECRET:test-client-secret}
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope:
+              - email
+              - profile
+  jwt:
+    secret: ${JWT_SECRET_TOKEN:test-secret-at-least-32-characters-long-for-hs256}
+  mail:
+    sender_email: ${SMTP_SENDER_EMAIL:noreply@example.com}
+
+server:
+  forward-headers-strategy: framework
+  port: ${SERVER_PORT:8080}
+
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:3000}
+  jwt-cookie:
+    secure: ${JWT_COOKIE_SECURE:true}
+    same-site: ${JWT_COOKIE_SAME_SITE:None}
+    name: ${JWT_COOKIE_NAME:JWT}
+  jwt:
+    expiration-seconds: ${JWT_EXPIRATION_SECONDS:604800}
+
+brevo:
+  base-url: ${BREVO_BASE_URL:https://api.brevo.com/v3}
+  api-key: ${BREVO_API_KEY:}
+  newsletter-list-id: ${BREVO_NEWSLETTER_LIST_ID:0}
+
+stripe:
+  secret-key: ${STRIPE_SECRET_KEY:}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+  prices:
+    ubc-student: ${STRIPE_PRICE_UBC_STUDENT:}
+    non-ubc-student: ${STRIPE_PRICE_NON_UBC_STUDENT:}
+    non-student: ${STRIPE_PRICE_NON_STUDENT:}
+
+logging:
+  level:
+    org.springframework.security: INFO
+    com.ubcmmhcsoftware: INFO
