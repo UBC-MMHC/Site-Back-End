@@ -32,6 +32,7 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JWTAuthenticationFilter jwtAuthenticationFilter;
     private final MyOAuth2SuccessHandler myOAuth2SuccessHandler;
+    private final MyOAuth2FailureHandler myOAuth2FailureHandler;
     private final AppProperties appProperties;
     private final CustomUserDetailsService customUserDetailsService;
 
@@ -82,7 +83,8 @@ public class SecurityConfig {
                 .oauth2Login(oauth -> oauth
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService))
-                        .successHandler(myOAuth2SuccessHandler))
+                        .successHandler(myOAuth2SuccessHandler)
+                        .failureHandler(myOAuth2FailureHandler))
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint(
                                 new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)));
