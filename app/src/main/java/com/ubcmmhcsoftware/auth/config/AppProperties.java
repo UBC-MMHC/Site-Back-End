@@ -26,6 +26,10 @@ public class AppProperties {
         return frontendUrl + "/auth/callback";
     }
 
+    public String getLoginFailureUrl() {
+        return frontendUrl + "/login?error=oauth_failed";
+    }
+
     public String getUnauthorizedUrl() {
         return frontendUrl + "/unauthorized";
     }
